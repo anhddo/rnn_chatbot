@@ -49,9 +49,11 @@ def build_model(vocab_size, load_ckpt=False, ckpt_epoch=-1):
     hidden_size = config['MODEL']['HIDDEN_SIZE']
     attn_method = config['MODEL']['ATTN_METHOD']
     n_encoder_layers = config['MODEL']['N_ENCODER_LAYERS']
+    n_decoder_layers = config['MODEL']['N_DECODER_LAYERS']
     dropout = config['MODEL']['DROPOUT']
     encoder = Encoder(vocab_size, hidden_size, n_encoder_layers, dropout=dropout)
-    decoder = Decoder(hidden_size, vocab_size, attn_method, dropout=dropout)
+    decoder = Decoder(hidden_size, vocab_size, attn_method, dropout=dropout,
+            n_layers = n_decoder_layers)
     model = Seq2Seq(
         encoder=encoder,
         decoder=decoder,
