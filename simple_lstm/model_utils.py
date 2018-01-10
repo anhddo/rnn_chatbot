@@ -51,14 +51,12 @@ def build_model(vocab_size, load_ckpt=False, ckpt_epoch=-1):
     n_encoder_layers = config['MODEL']['N_ENCODER_LAYERS']
     n_decoder_layers = config['MODEL']['N_DECODER_LAYERS']
     dropout = config['MODEL']['DROPOUT']
-    encoder = Encoder(vocab_size, hidden_size, n_encoder_layers, dropout=dropout)
-    decoder = Decoder(hidden_size, vocab_size, attn_method, dropout=dropout,
-            n_layers = n_decoder_layers)
+    encoder = Encoder(vocab_size, hidden_size, n_layers = n_encoder_layers, dropout=dropout)
+    decoder = Decoder(hidden_size, vocab_size, n_layers = n_decoder_layers, dropout=dropout)
     model = Seq2Seq(
         encoder=encoder,
         decoder=decoder,
-        max_length=config['LOADER']['MAX_LENGTH'],
-        tie_weights=config['MODEL']['TIE_WEIGHTS']
+        max_length=config['LOADER']['MAX_LENGTH']
     )
     print(model)
     if load_ckpt is True and os.path.exists(CKPT_PATH) is True:

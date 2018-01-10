@@ -14,25 +14,22 @@ with open('config.json') as config_file:
 USE_CUDA = config['TRAIN']['CUDA']
 
 class Seq2Seq(nn.Module):
-    def __init__(self, encoder, decoder, max_length=20, tie_weights=False):
+    def __init__(self, encoder, decoder, max_length=20):
         super(Seq2Seq, self).__init__()
         self.encoder = encoder
         self.decoder = decoder
         self.max_length = max_length
 
         if USE_CUDA:
-            self.encoder.cuda()
-            self.decoder.cuda()
+            self.cuda()
 
         for param in self.parameters():
             param.data.uniform_(-0.08, 0.08)
 
-        if tie_weights:
-            self.decoder.embedding.weight = self.encoder.embedding.weight
-
-    def forward(self, input_group, target_group=(None, None), teacher_forcing_ratio=0.5):
+    def forward(self, input_group, target_group=(None, None),
+            teacher_forcing_ratio=0.5, is_train = True):
         input_var, input_lens = input_group
-        encoder_outputs, encoder_hidden = self.encoder(input_var, input_lens)
+        encoder_outputs, (h_t, c_t) = self.encoder(input_var, input_lens)
 
         batch_size = input_var.size(1)
         target_var, target_lens = target_group
@@ -46,21 +43,29 @@ class Seq2Seq(nn.Module):
         all_decoder_outputs = Variable(torch.zeros(max_target_length, batch_size, self.decoder.output_size))
         # first decoder input
         decoder_input = Variable(torch.LongTensor([GO_token] * batch_size), requires_grad=False)
+        decoder_h_t = Variable(torch.zeros(self.decoder.n_layers,batch_size, self.decoder.hidden_size))
+        decoder_h_t[0] = h_t[-1]
+        decoder_c_t = Variable(torch.zeros(self.decoder.n_layers,batch_size, self.decoder.hidden_size))
+
         if USE_CUDA:
-            all_decoder_outputs = all_decoder_outputs.cuda()
-            decoder_input = decoder_input.cuda()
+            all_decoder_outputs.data = all_decoder_outputs.data.cuda()
+            decoder_input.data = decoder_input.data.cuda()
+            decoder_h_t.data = decoder_h_t.data.cuda()
+            decoder_c_t.data = decoder_c_t.data.cuda()
+
+        decoder_hidden = (decoder_h_t, decoder_c_t)
         for t in range(max_target_length):
             decoder_output, decoder_hidden = \
-                self.decoder(decoder_input, decoder_hidden, encoder_outputs)
+                self.decoder(decoder_input, decoder_hidden, encoder_outputs,
+                        is_train = is_train)
             all_decoder_outputs[t] = decoder_output
             # select real target or decoder output
             use_teacher_forcing = random.random() < teacher_forcing_ratio
             if use_teacher_forcing:
                 decoder_input = target_var[t]
             else:
-                # decoder_output = F.log_softmax(decoder_output)
-                topv, topi = decoder_output.data.topk(1, dim=1)
-                decoder_input = Variable(topi.squeeze(1))
+                topv, topi = decoder_output.topk(1, dim=1)
+                decoder_input = topi.squeeze(1)
 
         return all_decoder_outputs
 
@@ -69,10 +74,8 @@ class Seq2Seq(nn.Module):
         length = input_var.size(0)
         input_group = (input_var, [length])
         # outputs size (max_length, output_size)
-        decoder_outputs = self.forward(input_group, teacher_forcing_ratio=0)
-        # topv, topi = decoder_outputs.data.topk(1, dim=1)
-        # decoder_index = topi.squeeze(1)
-        # return decoder_index
+        decoder_outputs = self.forward(input_group, teacher_forcing_ratio=0,
+                is_train = False)
         return decoder_outputs
 
 class Encoder(nn.Module):
@@ -86,9 +89,7 @@ class Encoder(nn.Module):
         self.bidirectional = bidirectional
 
         self.embedding = nn.Embedding(input_size, hidden_size)
-        self.rnn = nn.LSTM(hidden_size, hidden_size, n_layers=n_layers, dropout=dropout)
-        if USE_CUDA:
-            self.rnn = self.rnn.cuda()
+        self.rnn = nn.LSTM(hidden_size, hidden_size, num_layers=n_layers, dropout=dropout)
 
     def forward(self, inputs_seqs, input_lens, hidden=None):
         # embedded size (max_len, batch_size, hidden_size)
@@ -107,21 +108,17 @@ class Decoder(nn.Module):
         self.dropout = dropout
 
         self.embedding = nn.Embedding(output_size, hidden_size)
-        self.rnn = nn.LSTM(hidden_size, hidden_size, n_layers=n_layers, dropout=dropout)
+        self.rnn = nn.LSTM(hidden_size, hidden_size, num_layers=n_layers, dropout=dropout)
         self.out = nn.Linear(hidden_size, output_size)
-        if USE_CUDA:
-            self.rnn = self.gru.cuda()
-            self.out = self.out.cuda()
 
-    def forward(self, input_seqs, last_hidden, encoder_ouputs):
+    def forward(self, input_seqs, last_hidden, encoder_ouputs, is_train = True):
         # input_seqs size (batch_size,)
         # last_hidden size (n_layers, batch_size, hidden_size)
         # encoder_ouputs size (max_len, batch_size, hidden_size)
         batch_size = input_seqs.size(0)
         # embedded size (1, batch_size, hidden_size)
         embedded = self.embedding(input_seqs).unsqueeze(0)
-        # output size (1, batch_size, hidden_size)
-        output, hidden = self.rnn(embedded, last_hidden)
-        # attn_weights size (batch_size, 1, max_len)
-        output = self.out(concat_output)
+        rnn_output, hidden = self.rnn(embedded, last_hidden)
+        output = self.out(rnn_output)
+        output = output.squeeze(0)
         return output, hidden
