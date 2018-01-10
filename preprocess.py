@@ -24,7 +24,7 @@ def load_conversations(file_path):
 
 def load_movie_lines(file_path):
     id2sentence = {}
-    with open(file_path) as file:
+    with open(file_path, encoding = 'utf-8', errors = 'ignore') as file:
         for line in file:
             sp = line[:-1].split(' +++$+++ ')
             lid, sentence = sp[0], sp[4]
@@ -44,7 +44,7 @@ def export_dialogue_corpus():
             else:
                 answers.append(sentence)
     dialogue_groups = zip(questions, answers)
-    print('Dialogue pairs: %d' % len(dialogue_groups))
+    print('Dialogue pairs: %d' % len(questions))
 
     # random.shuffle(dialogue_corpus)
     with open(DATA_PATH + DIALOGUE_CORPUS, 'w') as file:

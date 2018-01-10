@@ -21,7 +21,7 @@ MAX_LENGTH = config['LOADER']['MAX_LENGTH']
 MIN_COUNT = config['LOADER']['MIN_COUNT']
 
 # Regular expressions used to tokenize.
-_WORD_SPLIT = re.compile(b"([.,!?\"':;)(])")
+_WORD_SPLIT = re.compile(r"([.,!?\"':;)(])")
 
 def basic_tokenizer(sentence):
     """Very basic tokenizer: split the sentence into a list of tokens."""

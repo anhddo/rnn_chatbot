@@ -30,6 +30,7 @@ class Seq2Seq(nn.Module):
     def forward(self, input_group, target_group=(None, None), teacher_forcing_ratio=0.5):
         input_var, input_lens = input_group
         encoder_outputs, encoder_hidden = self.encoder(input_var, input_lens)
+        __import__('pdb').set_trace()
 
         batch_size = input_var.size(1)
         target_var, target_lens = target_group
