@@ -29,8 +29,8 @@ def main():
     vocabulary_list = sorted(dataset.vocabulary.word2index.items(), key=lambda x: x[1])
     save_vocabulary(vocabulary_list)
     vocab_size = dataset.get_vocabulary_size()
-    model = build_model(vocab_size)
-    model_optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    model = build_model(vocab_size, load_ckpt = True)
+    model_optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 
     start = time.time()
     dataset_len = len(dataset)
