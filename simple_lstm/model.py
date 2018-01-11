@@ -42,7 +42,7 @@ class Seq2Seq(nn.Module):
     def forward(self, input_group, target_group=(None, None),
             teacher_forcing_ratio=0.5, is_train = True):
         input_var, input_lens = input_group
-        encoder_outputs, (h_t, c_t) = self.encoder(input_var, input_lens)
+        encoder_outputs, encoder_hidden = self.encoder(input_var, input_lens)
 
         batch_size = input_var.size(1)
         target_var, target_lens = target_group
@@ -56,17 +56,12 @@ class Seq2Seq(nn.Module):
         all_decoder_outputs = Variable(torch.zeros(max_target_length, batch_size, self.decoder.output_size))
         # first decoder input
         decoder_input = Variable(torch.LongTensor([GO_token] * batch_size), requires_grad=False)
-        decoder_h_t = Variable(torch.zeros(self.decoder.n_layers,batch_size, self.decoder.hidden_size))
-        decoder_h_t[0] = h_t[-1]
-        decoder_c_t = Variable(torch.zeros(self.decoder.n_layers,batch_size, self.decoder.hidden_size))
 
         if USE_CUDA:
             all_decoder_outputs.data = all_decoder_outputs.data.cuda()
             decoder_input.data = decoder_input.data.cuda()
-            decoder_h_t.data = decoder_h_t.data.cuda()
-            decoder_c_t.data = decoder_c_t.data.cuda()
 
-        decoder_hidden = (decoder_h_t, decoder_c_t)
+        decoder_hidden = encoder_hidden
         for t in range(max_target_length):
             decoder_output, decoder_hidden = \
                 self.decoder(decoder_input, decoder_hidden, encoder_outputs,
