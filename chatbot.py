@@ -15,9 +15,10 @@ ckpt_epoch = config['TEST']['CKPT_EPOCH']
 def main():
     vocab = load_vocabulary()
     model = build_model(len(vocab.word2index), load_ckpt=True, ckpt_epoch=ckpt_epoch)
+    model.cpu()
     bot = BotAgent(model, vocab)
     while True:
-        user_input = raw_input('me: ')
+        user_input = input('me: ')
         if user_input.strip() == '':
             continue
         print('%s: %s' % (BOT_NAME, bot.response(user_input)))
