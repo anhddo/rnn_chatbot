@@ -37,14 +37,13 @@ def main():
     epoch = 0
     print_loss_total = 0.0
     print('Start Training.')
-    parallel_model = nn.DataParallel(model)
     while epoch < n_epochs:
         epoch += 1
         input_group, target_group = dataset.random_batch()
         # zero gradients
         model_optimizer.zero_grad()
         # run seq2seq
-        all_decoder_outputs = parallel_model(input_group, target_group, teacher_forcing_ratio=1)
+        all_decoder_outputs = model(input_group, target_group, teacher_forcing_ratio=1)
         target_var, target_lens = target_group
         # loss calculation and backpropagation
         loss = masked_cross_entropy(
