@@ -47,6 +47,26 @@ def model_evaluate(model, dataset, evaluate_num=10, auto_test=True):
     model.train(True)
     return total_loss / evaluate_num
 
+def get_all_ckpts_file():
+    ckpts = []
+    CKPT_PATH = config['TRAIN']['PATH']
+    prefix = config['TRAIN']['PREFIX']
+    file_names = glob.glob('%s%s*' % (CKPT_PATH, prefix))
+    return file_names
+
+def convert_ckpt_str_to_array(file_names):
+    ckpts = [int(name.split('_')[-1]) for name in file_names]
+    return ckpts
+
+def get_ckpts():
+    file_names = get_all_ckpts_file()
+    ckpts = convert_ckpt_str_to_array(file_names)
+    return ckpts
+
+def max_ckpts():
+    ckpts = get_ckpts()
+    retun -1 if len(ckpts) == 0 else max(ckpts)
+
 def build_model(vocab_size, load_ckpt=False, ckpt_epoch=-1):
     model = create_seq2seq(vocab_size)
     print(model)
@@ -58,16 +78,10 @@ def build_model(vocab_size, load_ckpt=False, ckpt_epoch=-1):
             model_path = '%s%s_%d' % (CKPT_PATH, prefix, ckpt_epoch)
         else:
             # use last checkpoint
-            ckpts = []
-            file_names = glob.glob('%s%s*' % (CKPT_PATH, prefix))
-            ckpts = [int(name.split('_')[-1]) for name in file_names]
-            sorted_idx = np.argsort(ckpts)
+            ckpts = get_ckpts()
             if len(ckpts) > 0:
                 model_path = '%s%s_%d' % (CKPT_PATH, prefix, max(ckpts))
 
-            if len(ckpts) >= 3:
-                for idx in sorted_idx[:-2]:
-                    os.remove(file_names[idx])
             # __import__('pdb').set_trace()
         if model_path is not None and os.path.exists(model_path):
             model.load_state_dict(torch.load(model_path))
@@ -86,6 +100,12 @@ def init_path():
 
 def save_model(model, epoch):
     init_path()
+    file_names = get_all_ckpts_file()
+    ckpts = convert_ckpt_str_to_array(file_names)
+    sorted_idx = np.argsort(ckpts)
+    if len(ckpts) >= 3:
+        for idx in sorted_idx[:-2]:
+            os.remove(file_names[idx])
     save_path = '%s%s_%d' % (CKPT_PATH, config['TRAIN']['PREFIX'], epoch)
     torch.save(model.state_dict(), save_path)
 
