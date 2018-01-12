@@ -68,10 +68,19 @@ def main():
             print('Test PPL: %.4f, lr=%f' % (math.exp(test_loss),
                 model_optimizer.param_groups[0]['lr']))
             print_loss_total = 0.0
+            hot_update_lr(model_optimizer)
             if iter_idx % save_every == 0:
                 save_model(model, iter_idx)
         # break
     save_model(model, iter_idx)
+
+def hot_update_lr(model_optimizer):
+    with open('config.json') as config_file:
+        config = json.load(config_file)
+    learning_rate = config['TRAIN']['LEARNING_RATE']
+    for param_group in model_optimizer.param_groups:
+            param_group['lr'] = learning_rate
+
 
 def print_summary(start, epoch, print_ppl_avg):
     output_log = '%s (epoch: %d finish: %d%%) PPL: %.4f' %\
