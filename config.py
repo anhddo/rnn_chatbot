@@ -17,6 +17,8 @@ n_decoder_layers = 0
 clip = 0
 print_every = 0
 save_every = 0
+encoder_bidirectional = 0
+single_embedding = 0
 
 def parse(config_str):
     global use_cuda
@@ -35,6 +37,7 @@ def parse(config_str):
     global clip
     global print_every
     global save_every
+    global single_embedding
 
 
     with open('config/%s.json' %(config_str)) as config_file:
@@ -62,4 +65,7 @@ def parse(config_str):
 
         print_every = config['TRAIN']['PRINT_EVERY']
         save_every = config['TRAIN']['SAVE_EVERY']
+
+        encoder_bidirectional = config['MODEL']['ENCODER_BIDIRECTIONAL']
+        single_embedding = config['MODEL']['SINGLE_EMBEDDING']
 
