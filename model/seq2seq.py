@@ -41,18 +41,21 @@ class Seq2Seq(nn.Module):
         # first decoder input
         decoder_input = Variable(torch.LongTensor([GO_token] * batch_size))
 
-
-
-
         if config.use_cuda:
             all_decoder_outputs.data = all_decoder_outputs.data.cuda()
             decoder_input.data = decoder_input.data.cuda()
 
-        decoder_hidden = encoder_hidden
+        if config.encoder_bidirectional:
+            encoder_ht, encoder_ct = encoder_hidden
+            n_layers = encoder_ht.size(0)#n_layer*n_direction
+            decoder_ht = torch.cat([encoder_ht[0:n_layers:2], encoder_ht[1:n_layers:2]], 2)
+            decoder_ct = torch.cat([encoder_ct[0:n_layers:2], encoder_ct[1:n_layers:2]], 2)
+            decoder_hidden = (decoder_ht, decoder_ct)
+        else:
+            decoder_hidden = encoder_hidden
         for t in range(max_target_length):
-            decoder_output, decoder_hidden = \
-                self.decoder(decoder_input, decoder_hidden, encoder_outputs,
-                        is_train = is_train)
+            decoder_output, decoder_hidden = self.decoder(decoder_input,\
+                    decoder_hidden, encoder_outputs, is_train = is_train)
             all_decoder_outputs[t] = decoder_output
             # select real target or decoder output
             use_teacher_forcing = random.random() < teacher_forcing_ratio

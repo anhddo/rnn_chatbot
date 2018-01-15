@@ -1,0 +1,22 @@
+What’s your name?
+Where are you from?
+Where do you come from?
+What is your surname?
+What is your family name?
+What’s your first name?
+What’s your address?
+Where do you live?
+What’s your telephone number?
+What’s your email address?
+How old are you?
+When and where were you born?
+Are you married?
+What’s your marital status?
+What do you do?
+What’s your job?
+Have you got a house?
+Have you got any children?
+Can you play tennis?
+Can you speak English?
+Could you speak English when you were five years old?
+How do you do?

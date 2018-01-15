@@ -25,6 +25,7 @@ dialogue_corpus = 0
 min_length = 0
 max_length = 0
 min_count = 0
+ckpt_epoch = 0
 
 def parse(config_str):
     global use_cuda
@@ -51,6 +52,7 @@ def parse(config_str):
     global min_length
     global max_length
     global min_count
+    global ckpt_epoch
     
 
 
@@ -91,3 +93,4 @@ def parse(config_str):
         max_length = config['LOADER']['MAX_LENGTH']
         # least word count
         min_count = config['LOADER']['MIN_COUNT']
+        ckpt_epoch = config['TEST']['CKPT_EPOCH']

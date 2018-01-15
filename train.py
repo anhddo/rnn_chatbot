@@ -39,7 +39,7 @@ def train():
     ckpts = get_ckpts()
     iter_idx = 0 if len(ckpts) == 0 else max(ckpts)
     print_loss_total = 0.0
-    milestones = [total_batch] * 15
+    milestones = [total_batch] * 7
     milestones[0] = total_batch * 50
     milestones[1] = total_batch * 25
     milestones[2] = total_batch * 15
