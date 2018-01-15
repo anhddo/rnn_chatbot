@@ -21,8 +21,8 @@
         "PATH": "./checkpoint/base_lstm_512_4_4/",
         "VOCABULARY": "vocabulary.txt",
         "PREFIX": "dump",
-        "PRINT_EVERY": 500,
-        "SAVE_EVERY": 1500
+        "PRINT_EVERY": 1000,
+        "SAVE_EVERY": 2000
     },
     "MODEL": {
         "NAME":"base_lstm",
