@@ -5,20 +5,13 @@ import json
 import random
 import torch
 import data_utils
-from simple_lstm.model import create_seq2seq
 from data_utils import Vocabulary
 from masked_cross_entropy import *
 from custom_token import *
 import numpy as np
 import glob
-
-with open('config.json') as config_file:
-    config = json.load(config_file)
-
-CKPT_PATH = config['TRAIN']['PATH']
-USE_CUDA = config['TRAIN']['CUDA']
-
-batch_size = config['TRAIN']['BATCH_SIZE']
+from importlib import import_module
+import config
 
 question_list = []
 with open('test_questions.txt') as file:
@@ -30,7 +23,9 @@ def model_evaluate(model, dataset, evaluate_num=10, auto_test=True):
     total_loss = 0.0
     for _ in range(evaluate_num):
         input_group, target_group = dataset.random_test()
-        all_decoder_outputs = model(input_group, target_group, teacher_forcing_ratio=1)
+        all_decoder_outputs = model(input_group,
+                target_group,
+                teacher_forcing_ratio=1)
         target_var, target_lens = target_group
         loss = masked_cross_entropy(
             all_decoder_outputs.transpose(0, 1).contiguous(),
@@ -38,7 +33,8 @@ def model_evaluate(model, dataset, evaluate_num=10, auto_test=True):
             target_lens
         )
         total_loss += loss.data[0]
-        # format_output(dataset.vocabulary.index2word, input_group, target_group, all_decoder_outputs)
+        # format_output(dataset.vocabulary.index2word, input_group,\
+        #target_group, all_decoder_outputs)
     if auto_test is True:
         bot = BotAgent(model, dataset.vocabulary)
         for question in question_list:
@@ -49,9 +45,7 @@ def model_evaluate(model, dataset, evaluate_num=10, auto_test=True):
 
 def get_all_ckpts_file():
     ckpts = []
-    CKPT_PATH = config['TRAIN']['PATH']
-    prefix = config['TRAIN']['PREFIX']
-    file_names = glob.glob('%s%s*' % (CKPT_PATH, prefix))
+    file_names = glob.glob('%s%s*' % (config.checkpoint_path, config.prefix))
     return file_names
 
 def convert_ckpt_str_to_array(file_names):
@@ -67,38 +61,37 @@ def max_ckpts():
     ckpts = get_ckpts()
     retun -1 if len(ckpts) == 0 else max(ckpts)
 
-def build_model(vocab_size, load_ckpt=False, ckpt_epoch=-1):
-    model = create_seq2seq(vocab_size)
-    print(model)
-    if load_ckpt is True and os.path.exists(CKPT_PATH) is True:
+def build_model(vocab_size, load_ckpt=False, ckpt_epoch = -1):
+    model_pkg = import_module('model.%s'%(config.model_name))
+    model = model_pkg.create_model(vocab_size)
+
+    if load_ckpt is True and os.path.exists(config.checkpoint_path) is True:
         # load checkpoint
-        prefix = config['TRAIN']['PREFIX']
+        prefix = config.prefix
         model_path = None
         if ckpt_epoch >= 0:
-            model_path = '%s%s_%d' % (CKPT_PATH, prefix, ckpt_epoch)
+            model_path = '%s%s_%d' % (config.checkpoint_path, prefix, ckpt_epoch)
         else:
             # use last checkpoint
             ckpts = get_ckpts()
             if len(ckpts) > 0:
-                model_path = '%s%s_%d' % (CKPT_PATH, prefix, max(ckpts))
+                model_path = '%s%s_%d' % (config.checkpoint_path, prefix, max(ckpts))
 
-            # __import__('pdb').set_trace()
+        print(model_path)
         if model_path is not None and os.path.exists(model_path):
-            model.load_state_dict(torch.load(model_path))
+            torch_object = torch.load(model_path)
+            model.load_state_dict(torch_object)
             print('Load %s' % model_path)
 
-    # print('Seq2Seq parameters:')
-    # for name, param in model.state_dict().items():
-    #     print(name, param.size())
     if USE_CUDA:
         model = model.cuda()
     return model
 
 def init_path():
-    if os.path.exists(CKPT_PATH) is False:
-        os.mkdir(CKPT_PATH)
+    if os.path.exists(config.checkpoint_path) is False:
+        os.mkdir(config.checkpoint_path)
 
-def save_model(model, epoch):
+def save_model(model, iter_idx):
     init_path()
     file_names = get_all_ckpts_file()
     ckpts = convert_ckpt_str_to_array(file_names)
@@ -106,19 +99,19 @@ def save_model(model, epoch):
     if len(ckpts) >= 3:
         for idx in sorted_idx[:-2]:
             os.remove(file_names[idx])
-    save_path = '%s%s_%d' % (CKPT_PATH, config['TRAIN']['PREFIX'], epoch)
+    save_path = '%s%s_%d' % (config.checkpoint_path, config.prefix, iter_idx)
     torch.save(model.state_dict(), save_path)
 
 def save_vocabulary(vocabulary_list):
     init_path()
-    with open(CKPT_PATH + config['TRAIN']['VOCABULARY'], 'w') as file:
+    with open(config.vocabulary_path, 'w') as file:
         for word, index in vocabulary_list:
             file.write('%s %d\n' % (word, index))
 
 def load_vocabulary():
-    if os.path.exists(CKPT_PATH + config['TRAIN']['VOCABULARY']):
+    if os.path.exists(config.vocabulary_path):
         word2index = {}
-        with open(CKPT_PATH + config['TRAIN']['VOCABULARY']) as file:
+        with open(config.vocabulary_path) as file:
             for line in file:
                 line_spl = line[:-1].split()
                 word2index[line_spl[0]] = int(line_spl[1])
@@ -128,7 +121,7 @@ def load_vocabulary():
         vocab.index2word = index2word
         return vocab
     else:
-        raise('not found %s' % CKPT_PATH + config['TRAIN']['VOCABULARY'])
+        raise('not found %s' % config.vocabulary_path)
 
 class BotAgent(object):
     def __init__(self, model, vocab):
