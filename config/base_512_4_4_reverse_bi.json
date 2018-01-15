@@ -18,7 +18,7 @@
         "TEACHER_FORCING_RATIO": 0.5,
         "CLIP": 5,
         "REVERSE_INPUT": true,
-        "PATH": "./checkpoint/base_lstm_512_4_4/",
+        "PATH": "./checkpoint/base_lstm_512_4_4_re_bi/",
         "VOCABULARY": "vocabulary.txt",
         "PREFIX": "dump",
         "PRINT_EVERY": 1500,
