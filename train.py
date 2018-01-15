@@ -31,6 +31,7 @@ def train():
     save_vocabulary(vocabulary_list)
     vocab_size = dataset.get_vocabulary_size()
     model = build_model(vocab_size, load_ckpt = True)
+    print(model)
     optimizer = optim.SGD(model.parameters(), lr = config.learning_rate)
 
     start = time.time()
@@ -43,14 +44,13 @@ def train():
             total_batch * 0.5]
     )
     milestones = np.cumsum(milestones)
-    print(milestones)
 
     n_iters = milestones[-1]
 
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer,
             milestones = milestones, gamma=0.5)
     scheduler.step(iter_idx)
-    print('Start Training.')
+    print('Start Training. total: %s iterations'%n_iters)
     while iter_idx < n_iters:
         iter_idx += 1
         scheduler.step()

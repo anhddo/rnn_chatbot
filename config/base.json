@@ -13,7 +13,7 @@
     "TRAIN": {
         "CUDA": true,
         "N_EPOCHS": 100000,
-        "BATCH_SIZE": 32,
+        "BATCH_SIZE": 16,
         "LEARNING_RATE": 0.7,
         "TEACHER_FORCING_RATIO": 0.5,
         "CLIP": 5,
@@ -26,8 +26,8 @@
     "MODEL": {
         "NAME":"base_lstm",
         "HIDDEN_SIZE": 16,
-        "N_ENCODER_LAYERS": 3,
-        "N_DECODER_LAYERS": 1,
+        "N_ENCODER_LAYERS": 2,
+        "N_DECODER_LAYERS": 2,
         "DROPOUT": 0.1,
         "ATTN_METHOD": "general",
         "TIE_WEIGHTS": false
