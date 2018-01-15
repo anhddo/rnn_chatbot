@@ -24,7 +24,7 @@ class Seq2Seq(nn.Module):
     def forward(self, input_group, target_group=(None, None),
             teacher_forcing_ratio=0.5, is_train = True):
         input_var, input_lens = input_group
-        encoder_outputs, (encoder_ht, encoder_ct) = self.encoder(input_var, input_lens)
+        encoder_outputs, encoder_hidden = self.encoder(input_var, input_lens)
 
         batch_size = input_var.size(1)
         
@@ -41,28 +41,14 @@ class Seq2Seq(nn.Module):
         # first decoder input
         decoder_input = Variable(torch.LongTensor([GO_token] * batch_size))
 
-        decoder_h_t = Variable(torch.zeros(self.decoder.n_layers,\
-                batch_size, self.decoder.hidden_size))
 
 
-        if config.encoder_bidirectional:
-            forward_ht = encoder_ht[-2]
-            backward_ht = encoder_ht[-1]
-            decoder_h_t[0] = torch.cat((forward_ht, backward_ht), dim = 1)
-        else:
-            decoder_h_t[0] = encoder_ht[-1]
-
-
-        decoder_c_t = Variable(torch.zeros(self.decoder.n_layers, batch_size,\
-                self.decoder.hidden_size))
 
         if config.use_cuda:
             all_decoder_outputs.data = all_decoder_outputs.data.cuda()
             decoder_input.data = decoder_input.data.cuda()
-            decoder_h_t.data = decoder_h_t.data.cuda()
-            decoder_c_t.data = decoder_c_t.data.cuda()
 
-        decoder_hidden = (decoder_h_t, decoder_c_t)
+        decoder_hidden = encoder_hidden
         for t in range(max_target_length):
             decoder_output, decoder_hidden = \
                 self.decoder(decoder_input, decoder_hidden, encoder_outputs,
