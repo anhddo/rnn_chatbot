@@ -130,7 +130,6 @@ class BotAgent(object):
 
     def response(self, question):
         input_var = self.build_input_var(question)
-        print(input_var)
         if input_var is None:
             return "sorry, I don 't know ."
         decoder_output = self.model.response(input_var)

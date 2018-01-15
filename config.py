@@ -36,6 +36,7 @@ def parse(config_str):
     global attn_method
     global n_decoder_layers
     global n_encoder_layers
+    global encoder_bidirectional
     global dropout
     global max_length
     global prefix
