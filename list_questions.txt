@@ -1,5 +1,12 @@
-What’s your name?
-Where are you from?
+hi
+hello
+nice to meet you .
+how are you ?
+What’s your name ?
+What is your name ?
+How old are you ?
+Where are you from ?
+which university you studying ?
 Where do you come from?
 What is your surname?
 What is your family name?
@@ -8,7 +15,6 @@ What’s your address?
 Where do you live?
 What’s your telephone number?
 What’s your email address?
-How old are you?
 When and where were you born?
 Are you married?
 What’s your marital status?
