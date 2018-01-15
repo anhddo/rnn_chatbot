@@ -25,8 +25,7 @@ class Seq2Seq(nn.Module):
             teacher_forcing_ratio=0.5, is_train = True):
         input_var, input_lens = input_group
         encoder_outputs, (h_t, c_t) = self.encoder(input_var, input_lens)
-
-        batch_size = input_var.size(1)
+        
         target_var, target_lens = target_group
         if target_var is None or target_lens is None:
             max_target_length = self.max_length
@@ -36,23 +35,16 @@ class Seq2Seq(nn.Module):
 
         # store all decoder outputs
         all_decoder_outputs = Variable(torch.zeros(max_target_length,\
-                batch_size, self.decoder.output_size))
+                config.batch_size, self.decoder.output_size))
         # first decoder input
-        decoder_input = Variable(torch.LongTensor([GO_token] * batch_size),\
+        decoder_input = Variable(torch.LongTensor([GO_token] * config.batch_size),\
                 requires_grad=False)
-        decoder_h_t = Variable(torch.zeros(self.decoder.n_layers,\
-                batch_size, self.decoder.hidden_size))
-        decoder_h_t[0] = h_t[-1]
-        decoder_c_t = Variable(torch.zeros(self.decoder.n_layers,batch_size,\
-                self.decoder.hidden_size))
 
         if config.use_cuda:
             all_decoder_outputs.data = all_decoder_outputs.data.cuda()
             decoder_input.data = decoder_input.data.cuda()
-            decoder_h_t.data = decoder_h_t.data.cuda()
-            decoder_c_t.data = decoder_c_t.data.cuda()
 
-        decoder_hidden = (decoder_h_t, decoder_c_t)
+        decoder_hidden = self.encoder_hidden_2_decoder_hidden(h_t)
         for t in range(max_target_length):
             decoder_output, decoder_hidden = \
                 self.decoder(decoder_input, decoder_hidden, encoder_outputs,
@@ -67,6 +59,22 @@ class Seq2Seq(nn.Module):
                 decoder_input = topi.squeeze(1)
 
         return all_decoder_outputs
+
+    def encoder_hidden_2_decoder_hidden(self, h_t):
+        decoder_h_t = Variable(torch.zeros(self.decoder.n_layers,\
+                config.batch_size, self.decoder.hidden_size))
+        print(66,decoder_h_t.size(), h_t.size())
+        decoder_h_t[0] = h_t[-1]
+        decoder_c_t = Variable(torch.zeros(self.decoder.n_layers, config.batch_size,\
+                self.decoder.hidden_size))
+
+        if config.use_cuda:
+            decoder_h_t.data = decoder_h_t.data.cuda()
+            decoder_c_t.data = decoder_c_t.data.cuda()
+
+        decoder_hidden = (decoder_h_t, decoder_c_t)
+        return decoder_hidden
+
 
     def response(self, input_var):
         # input_var size (length, 1)

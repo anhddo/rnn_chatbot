@@ -6,19 +6,8 @@ import random
 import torch
 from torch.autograd import Variable
 from custom_token import *
+import config
 
-with open('config.json') as config_file:
-    config = json.load(config_file)
-
-USE_CUDA = config['TRAIN']['CUDA']
-
-DATA_PATH = config['DATA']['PATH']
-DIALOGUE_CORPUS = config['DATA']['DIALOGUE_CORPUS']
-# range of sentenct length
-MIN_LENGTH = config['LOADER']['MIN_LENGTH']
-MAX_LENGTH = config['LOADER']['MAX_LENGTH']
-# least word count
-MIN_COUNT = config['LOADER']['MIN_COUNT']
 
 # Regular expressions used to tokenize.
 _WORD_SPLIT = re.compile(r"([.,!?\"':;)(])")
@@ -34,9 +23,9 @@ def basic_tokenizer(sentence):
 
 def build_DataLoader(batch_size=32):
     pairs = []
-    length_range = range(MIN_LENGTH, MAX_LENGTH)
+    length_range = range(config.min_length, config.max_length)
     print('Loding Corpus.')
-    with open(DATA_PATH + DIALOGUE_CORPUS) as file:
+    with open(config.data_path + config.dialogue_corpus) as file:
         i = 0
         for line in file:
             i += 1
@@ -55,7 +44,7 @@ def build_DataLoader(batch_size=32):
     for pa, pb in pairs:
         for word in pa + pb:
             vocab.index_word(word)
-    vocab.trim(MIN_COUNT)
+    vocab.trim(config.min_count)
 
     keep_pairs = []
     for pa, pb in pairs:
@@ -170,6 +159,10 @@ class DataLoader(object):
         input_seqs, target_seqs = zip(*batch_seq_pairs)
         # convert to index
         input_seqs = [self.indexes_from_sentence(s) for s in input_seqs]
+
+        if config.reverse_input:
+            input_seqs = [s[::-1] for s in input_seqs]
+
         target_seqs = [self.indexes_from_sentence(s) for s in target_seqs]
         # PAD input_seqs
         input_lens = [len(s) for s in input_seqs]
@@ -182,7 +175,7 @@ class DataLoader(object):
         # Turn padded arrays into (batch_size x max_len) tensors, transpose into (max_len x batch_size)
         input_var = Variable(torch.LongTensor(input_padded)).transpose(0, 1)
         target_var = Variable(torch.LongTensor(target_padded)).transpose(0, 1)
-        if USE_CUDA:
+        if config.use_cuda:
             input_var = input_var.cuda()
             target_var = target_var.cuda()
         return (input_var, input_lens), (target_var, target_lens)

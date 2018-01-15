@@ -19,6 +19,12 @@ print_every = 0
 save_every = 0
 encoder_bidirectional = 0
 single_embedding = 0
+reverse_input = 0
+data_path = 0
+dialogue_corpus = 0
+min_length = 0
+max_length = 0
+min_count = 0
 
 def parse(config_str):
     global use_cuda
@@ -38,6 +44,13 @@ def parse(config_str):
     global print_every
     global save_every
     global single_embedding
+    global reverse_input
+    global data_path
+    global dialogue_corpus
+    global min_length
+    global max_length
+    global min_count
+    
 
 
     with open('config/%s.json' %(config_str)) as config_file:
@@ -68,4 +81,12 @@ def parse(config_str):
 
         encoder_bidirectional = config['MODEL']['ENCODER_BIDIRECTIONAL']
         single_embedding = config['MODEL']['SINGLE_EMBEDDING']
+        reverse_input = config['TRAIN']['REVERSE_INPUT']
 
+        data_path = config['DATA']['PATH']
+        dialogue_corpus = config['DATA']['DIALOGUE_CORPUS']
+        # range of sentenct length
+        min_length = config['LOADER']['MIN_LENGTH']
+        max_length = config['LOADER']['MAX_LENGTH']
+        # least word count
+        min_count = config['LOADER']['MIN_COUNT']

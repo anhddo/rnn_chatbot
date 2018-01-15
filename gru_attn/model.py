@@ -27,7 +27,8 @@ class Seq2Seq(nn.Module):
         if tie_weights:
             self.decoder.embedding.weight = self.encoder.embedding.weight
 
-    def forward(self, input_group, target_group=(None, None), teacher_forcing_ratio=0.5):
+    def forward(self, input_group, target_group=(None, None), \
+            teacher_forcing_ratio=0.5):
         input_var, input_lens = input_group
         encoder_outputs, encoder_hidden = self.encoder(input_var, input_lens)
 
@@ -40,9 +41,11 @@ class Seq2Seq(nn.Module):
             max_target_length = max(target_lens)
 
         # store all decoder outputs
-        all_decoder_outputs = Variable(torch.zeros(max_target_length, batch_size, self.decoder.output_size))
+        all_decoder_outputs = Variable(torch.zeros(max_target_length, \
+                batch_size, self.decoder.output_size))
         # first decoder input
-        decoder_input = Variable(torch.LongTensor([GO_token] * batch_size), requires_grad=False)
+        decoder_input = Variable(torch.LongTensor([GO_token] * batch_size),\
+                requires_grad=False)
         if USE_CUDA:
             all_decoder_outputs = all_decoder_outputs.cuda()
             decoder_input = decoder_input.cuda()
@@ -84,7 +87,9 @@ class Attn(nn.Module):
             self.attn = nn.Linear(self.hidden_size, self.hidden_size)
         elif self.method == 'concat':
             self.attn = nn.Linear(self.hidden_size * 2, self.hidden_size)
-            self.v = nn.Parameter(weight_init.xavier_uniform(torch.FloatTensor(1, self.hidden_size)))
+            self.v = nn.Parameter(weight_init.xavier_uniform(\
+                torch.FloatTensor(1, self.hidden_size))
+            )
 
     def forward(self, hidden, encoder_outputs):
         attn_energies = self.batch_score(hidden, encoder_outputs)
@@ -95,23 +100,31 @@ class Attn(nn.Module):
         if self.method == 'dot':
             # encoder_outputs size (batch_size, hidden_size, length)
             encoder_outputs = encoder_outputs.permute(1, 2, 0)
-            energy = torch.bmm(hidden.transpose(0, 1), encoder_outputs).squeeze(1)
+            energy = torch.bmm(hidden.transpose(0, 1), encoder_outputs)\
+                    .squeeze(1)
         elif self.method == 'general':
             length = encoder_outputs.size(0)
             batch_size = encoder_outputs.size(1)
-            energy = self.attn(encoder_outputs.view(-1, self.hidden_size)).view(length, batch_size, self.hidden_size)
-            energy = torch.bmm(hidden.transpose(0, 1), energy.permute(1, 2, 0)).squeeze(1)
+            energy = self.attn(encoder_outputs.view(-1, self.hidden_size))\
+                    .view(length, batch_size, self.hidden_size)
+            energy = torch.bmm(hidden.transpose(0, 1), energy.permute(1, 2, 0))\
+                    .squeeze(1)
         elif self.method == 'concat':
             length = encoder_outputs.size(0)
             batch_size = encoder_outputs.size(1)
-            attn_input = torch.cat((hidden.repeat(length, 1, 1), encoder_outputs), dim=2)
-            energy = self.attn(attn_input.view(-1, 2 * self.hidden_size)).view(length, batch_size, self.hidden_size)
-            energy = torch.bmm(self.v.repeat(batch_size, 1, 1), energy.permute(1, 2, 0)).squeeze(1)
+            attn_input = torch.cat(\
+                    (hidden.repeat(length, 1, 1), encoder_outputs), dim=2)
+            energy = self.attn(attn_input.view(-1, 2 * self.hidden_size))\
+                    .view(length, batch_size, self.hidden_size)
+            energy = torch.bmm(\
+                    self.v.repeat(batch_size, 1, 1), \
+                    energy.permute(1, 2, 0)).squeeze(1)
         return energy
 
 
 class Encoder(nn.Module):
-    def __init__(self, input_size, hidden_size, n_layers=1, dropout=0.1, bidirectional=True):
+    def __init__(self, input_size, hidden_size, n_layers=1, dropout=0.1,\
+            bidirectional=True):
         super(Encoder, self).__init__()
 
         self.input_size = input_size

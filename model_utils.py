@@ -83,7 +83,7 @@ def build_model(vocab_size, load_ckpt=False, ckpt_epoch = -1):
             model.load_state_dict(torch_object)
             print('Load %s' % model_path)
 
-    if USE_CUDA:
+    if config.use_cuda:
         model = model.cuda()
     return model
 
@@ -130,13 +130,14 @@ class BotAgent(object):
 
     def response(self, question):
         input_var = self.build_input_var(question)
+        print(input_var)
         if input_var is None:
             return "sorry, I don 't know ."
         decoder_output = self.model.response(input_var)
         decoder_output = decoder_output.squeeze(1)
         topv, topi = decoder_output.data.topk(1, dim=1)
         topi = topi.squeeze(1)
-        if USE_CUDA:
+        if config.use_cuda:
             preidct_resp = topi.cpu().numpy()
         else:
             preidct_resp = topi.numpy()
@@ -157,9 +158,13 @@ class BotAgent(object):
             print('unknown_words: ' + str(unknown_words))
         # append EOS token
         words_index.append(EOS_token)
+
+        if config.reverse_input:
+            words_index = words_index[::-1]
+
         if len(words_index) > 0:
             input_var = Variable(torch.LongTensor([words_index])).transpose(0, 1)
-            if USE_CUDA:
+            if config.use_cuda:
                 input_var = input_var.cuda()
             # input_var size (length, 1)
             return input_var
