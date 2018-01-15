@@ -39,7 +39,7 @@ def train():
     ckpts = get_ckpts()
     iter_idx = 0 if len(ckpts) == 0 else max(ckpts)
     print_loss_total = 0.0
-    milestones = [int(total_batch * 0.5)] * 15
+    milestones = [total_batch] * 15
     milestones[0] = total_batch * 5
     milestones = np.cumsum(milestones)
 
