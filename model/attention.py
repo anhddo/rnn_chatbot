@@ -25,7 +25,6 @@ class Attention(nn.Module):
         #[bs,1, hidden_size]x[bs, hidden_size, max_length]-> [bs,1, max_length]
         scores = torch.bmm(decoder_ht.transpose(0,1), temp.permute(1,2,0))
         attention_weights = F.softmax(scores, dim = 2)
-        __import__('pdb').set_trace()
         #[bs,1, max_length]x[bs, max_length, hidden_size]-> [bs,1, hidden_size]
         context = torch.bmm(attention_weights, encoder_outputs.permute(1,0,2))
         # context [1,bs, hidden_size]
