@@ -9,6 +9,7 @@ from torch.autograd import Variable
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from custom_token import *
 import config
+from model.attention import Attention
 
 
 class Seq2Seq(nn.Module):
@@ -117,18 +118,24 @@ class Decoder(nn.Module):
         else:
             self.embedding = nn.Embedding(output_size, hidden_size)
 
+        if config.use_attn:
+            self.attention = Attention(self.hidden_size)
+
         self.rnn = nn.LSTM(hidden_size, hidden_size, num_layers=n_layers,
                 dropout=dropout)
         self.out = nn.Linear(hidden_size, output_size)
 
-    def forward(self, input_seqs, last_hidden, encoder_ouputs, is_train = True):
+    def forward(self, input_seqs, last_hidden, encoder_outputs, is_train = True):
         # input_seqs size (batch_size,)
         # last_hidden size (n_layers, batch_size, hidden_size)
         # encoder_ouputs size (max_len, batch_size, hidden_size)
         batch_size = input_seqs.size(0)
         # embedded size (1, batch_size, hidden_size)
         embedded = self.embedding(input_seqs).unsqueeze(0)
-        rnn_output, hidden = self.rnn(embedded, last_hidden)
-        output = self.out(rnn_output)
+        # rnn_output,last_ht size (1, batch_size, hidden_size)
+        output, hidden = self.rnn(embedded, last_hidden)
+        if config.use_attn:
+            output = self.attention(output, encoder_outputs)
+        output = self.out(output)
         output = output.squeeze(0)
         return output, hidden
