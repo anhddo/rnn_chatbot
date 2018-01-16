@@ -7,7 +7,6 @@ checkpoint_path = 0
 vocabulary_path = 0
 batch_size = 0
 hidden_size = 0
-attn_method = 0
 n_decoder_layers = 0
 dropout = 0
 max_length = 0
@@ -26,6 +25,7 @@ min_length = 0
 max_length = 0
 min_count = 0
 ckpt_epoch = 0
+use_attn = 0
 
 def parse(config_str):
     global use_cuda
@@ -34,7 +34,6 @@ def parse(config_str):
     global vocabulary_path
     global batch_size
     global hidden_size
-    global attn_method
     global n_decoder_layers
     global n_encoder_layers
     global encoder_bidirectional
@@ -53,8 +52,7 @@ def parse(config_str):
     global max_length
     global min_count
     global ckpt_epoch
-    
-
+    global use_attn
 
     with open('config/%s.json' %(config_str)) as config_file:
         config = json.load(config_file)
@@ -68,7 +66,6 @@ def parse(config_str):
         prefix = config['TRAIN']['PREFIX']
 
         hidden_size = config['MODEL']['HIDDEN_SIZE']
-        attn_method = config['MODEL']['ATTN_METHOD']
         n_encoder_layers = config['MODEL']['N_ENCODER_LAYERS']
         n_decoder_layers = config['MODEL']['N_DECODER_LAYERS']
         dropout = config['MODEL']['DROPOUT']
@@ -84,6 +81,7 @@ def parse(config_str):
 
         encoder_bidirectional = config['MODEL']['ENCODER_BIDIRECTIONAL']
         single_embedding = config['MODEL']['SINGLE_EMBEDDING']
+        use_attn = config['MODEL']['USE_ATTN']
         reverse_input = config['TRAIN']['REVERSE_INPUT']
 
         data_path = config['DATA']['PATH']
