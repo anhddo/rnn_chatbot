@@ -18,10 +18,8 @@ def create_model(vocab_size):
     encoder = Encoder(vocab_size, config.hidden_size, \
             n_layers = config.n_encoder_layers, dropout=config.dropout)
 
-    decoder_hidden_size = config.hidden_size * 2 \
-            if config.encoder_bidirectional else config.hidden_size
 
-    decoder = Decoder(decoder_hidden_size, vocab_size,\
+    decoder = Decoder(config.hidden_size, vocab_size,\
             n_layers = config.n_decoder_layers, dropout=config.dropout)
 
     model = Seq2Seq(

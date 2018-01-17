@@ -46,14 +46,7 @@ class Seq2Seq(nn.Module):
             all_decoder_outputs.data = all_decoder_outputs.data.cuda()
             decoder_input.data = decoder_input.data.cuda()
 
-        if config.encoder_bidirectional:
-            encoder_ht, encoder_ct = encoder_hidden
-            n_layers = encoder_ht.size(0)#n_layer*n_direction
-            decoder_ht = torch.cat([encoder_ht[0:n_layers:2], encoder_ht[1:n_layers:2]], 2)
-            decoder_ct = torch.cat([encoder_ct[0:n_layers:2], encoder_ct[1:n_layers:2]], 2)
-            decoder_hidden = (decoder_ht, decoder_ct)
-        else:
-            decoder_hidden = encoder_hidden
+        decoder_hidden = encoder_hidden[:config.n_decoder_layers]
         for t in range(max_target_length):
             decoder_output, decoder_hidden = self.decoder(decoder_input,\
                     decoder_hidden, encoder_outputs, is_train = is_train)
@@ -102,13 +95,14 @@ class Encoder(nn.Module):
         packed = pack_padded_sequence(embedded, input_lens)
         outputs, hidden = self.rnn(packed, hidden)
         outputs, output_lengths = pad_packed_sequence(outputs)
+        if config.encoder_bidirectional:
+            outputs = outputs[:,:,:self.hidden_size] + outputs[:,:,self.hidden_size:]
         return outputs, hidden
 
 class Decoder(nn.Module):
     def __init__(self, hidden_size, output_size, n_layers=1, dropout=0.1,\
             embedding = None):
         super(Decoder, self).__init__()
-        self.hidden_size = hidden_size
         self.output_size = output_size
         self.n_layers = n_layers
         self.dropout = dropout
@@ -119,7 +113,7 @@ class Decoder(nn.Module):
             self.embedding = nn.Embedding(output_size, hidden_size)
 
         if config.use_attn:
-            self.attention = Attention(self.hidden_size)
+            self.attention = Attention(hidden_size)
 
         self.rnn = nn.LSTM(hidden_size, hidden_size, num_layers=n_layers,
                 dropout=dropout)

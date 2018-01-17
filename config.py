@@ -7,7 +7,6 @@ checkpoint_path = 0
 vocabulary_path = 0
 batch_size = 0
 hidden_size = 0
-n_decoder_layers = 0
 dropout = 0
 max_length = 0
 prefix = 0
