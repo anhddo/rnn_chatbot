@@ -32,7 +32,7 @@
         "ENCODER_BIDIRECTIONAL": true,
         "SINGLE_EMBEDDING": true,
         "DROPOUT": 0.1,
-        "ATTN_METHOD": "general",
+        "USE_ATTN": false,
         "TIE_WEIGHTS": false
     },
     "TEST": {
