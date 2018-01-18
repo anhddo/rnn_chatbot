@@ -16,13 +16,21 @@ import config
 import numpy as np
 
 
-
 def main():
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('-c', dest='config')
     args = parser.parse_args()
     config.parse(args.config)
     train()
+
+def init_milestone(total_batch):
+    milestones = [total_batch * 5] * 5
+    milestones[0] = total_batch * 50
+    milestones[1] = total_batch * 20
+    milestones[2] = total_batch * 10
+    milestones[3] = total_batch * 10
+    milestones[4] = total_batch * 10
+    return np.cumsum(milestones)
 
 def train():
     dataset = build_DataLoader(batch_size=config.batch_size)
@@ -39,14 +47,8 @@ def train():
     ckpts = get_ckpts()
     iter_idx = 0 if len(ckpts) == 0 else max(ckpts)
     print_loss_total = 0.0
-    milestones = [total_batch * 5] * 8
-    milestones[0] = total_batch * 50
-    milestones[1] = total_batch * 20
-    milestones[2] = total_batch * 10
-    milestones[3] = total_batch * 10
-    milestones[4] = total_batch * 10
-    milestones = np.cumsum(milestones)
 
+    milestones = init_milestone(total_batch)
     n_iters = milestones[-1]
 
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer,
@@ -93,7 +95,7 @@ def hot_update_lr(model_optimizer):
         config = json.load(config_file)
     learning_rate = config['TRAIN']['LEARNING_RATE']
     for param_group in model_optimizer.param_groups:
-            param_group['lr'] = learning_rate
+        param_group['lr'] = learning_rate
 
 
 def print_summary(start, epoch, n_iters, print_ppl_avg):

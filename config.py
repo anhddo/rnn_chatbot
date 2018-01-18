@@ -25,6 +25,9 @@ max_length = 0
 min_count = 0
 ckpt_epoch = 0
 use_attn = 0
+movie_conversations = 0
+movie_lines = 0
+is_augment = 0
 
 def parse(config_str):
     global use_cuda
@@ -47,6 +50,9 @@ def parse(config_str):
     global reverse_input
     global data_path
     global dialogue_corpus
+    global movie_conversations
+    global movie_lines
+    global is_augment
     global min_length
     global max_length
     global min_count
@@ -85,6 +91,9 @@ def parse(config_str):
 
         data_path = config['DATA']['PATH']
         dialogue_corpus = config['DATA']['DIALOGUE_CORPUS']
+        movie_conversations = config['DATA']['MOVIE_CONVERSATIONS']
+        movie_lines = config['DATA']['MOVIE_LINES']
+        is_augment = config['DATA']['IS_AUGMENT']
         # range of sentenct length
         min_length = config['LOADER']['MIN_LENGTH']
         max_length = config['LOADER']['MAX_LENGTH']

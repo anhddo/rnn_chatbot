@@ -3,14 +3,9 @@ import random
 import json
 import re
 import data_utils
+import argparse
+import config
 
-with open('config.json') as config_file:
-    config = json.load(config_file)
-
-DATA_PATH = config['DATA']['PATH']
-MOVIE_CONVERSATIONS = config['DATA']['MOVIE_CONVERSATIONS']
-MOVIE_LINES = config['DATA']['MOVIE_LINES']
-DIALOGUE_CORPUS = config['DATA']['DIALOGUE_CORPUS']
 
 def load_conversations(file_path):
     dialogue_list = []
@@ -24,16 +19,44 @@ def load_conversations(file_path):
 
 def load_movie_lines(file_path):
     id2sentence = {}
-    with open(file_path, encoding = 'utf-8', errors = 'ignore') as file:
+    with open(file_path, encoding = 'iso-8859-1') as file:
         for line in file:
             sp = line[:-1].split(' +++$+++ ')
             lid, sentence = sp[0], sp[4]
+            sentence = re.sub(r'[\.]+', '.', sentence)
             id2sentence[lid] = sentence
     return id2sentence
 
-def export_dialogue_corpus():
-    dialogues = load_conversations(DATA_PATH + MOVIE_CONVERSATIONS)
-    id2sentence = load_movie_lines(DATA_PATH + MOVIE_LINES)
+def augment_sentence(questions, answers, augment_q, augment_a):
+    for pair in zip(questions, answers):
+        Q = pair[0]
+        A = pair[1]
+        q_sentences = Q.strip('.').split('.')
+        a_sentences = A.strip('.').split('.')
+        for i in range(len(q_sentences)):
+            for j in range(len(a_sentences)):
+                augment_q.append('.'.join(q_sentences[i:]))
+                augment_a.append('.'.join(a_sentences[:j+1]))
+
+def augment_extract(dialogues, id2sentence):
+    questions, answers = [], []
+    augment_q, augment_a = [], []
+    for ids in dialogues:
+        join_func = lambda id: ' '.join(data_utils.basic_tokenizer(id2sentence[id]))
+        sentences = [join_func(id) for id in ids]
+        # questions.extend(sentences[:-1])
+        # answers.extend(sentences[1:])
+        augment_sentence(sentences[:-1], sentences[1:], augment_q, augment_a)
+        # assert len(questions) == len(answers)
+        assert len(augment_q) == len(augment_a)
+
+    # questions.extend(augment_q)
+    # answers.extend(augment_a)
+
+    # return questions, answers
+    return augment_q, augment_a
+
+def normal_extract(dialogues, id2sentence):
     questions, answers = [], []
     for ids in dialogues:
         length = len(ids) if len(ids) % 2 == 0 else len(ids) - 1
@@ -43,13 +66,27 @@ def export_dialogue_corpus():
                 questions.append(sentence)
             else:
                 answers.append(sentence)
+    return questions, answers
+
+def export_dialogue_corpus():
+    dialogues = load_conversations(config.data_path + config.movie_conversations)
+    id2sentence = load_movie_lines(config.data_path + config.movie_lines)
+    if config.is_augment:
+        questions, answers = augment_extract(dialogues, id2sentence)
+    else:
+        questions, answers = normal_extract(dialogues, id2sentence)
     dialogue_groups = zip(questions, answers)
+
     print('Dialogue pairs: %d' % len(questions))
 
     # random.shuffle(dialogue_corpus)
-    with open(DATA_PATH + DIALOGUE_CORPUS, 'w') as file:
+    with open(config.data_path + config.dialogue_corpus, 'w') as file:
         for a, b in dialogue_groups:
             file.write('%s +++$+++ %s\n' % (a, b))
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('-c', dest='config')
+    args = parser.parse_args()
+    config.parse(args.config)
     export_dialogue_corpus()

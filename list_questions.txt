@@ -1,33 +1,24 @@
-hi .
-hello .
-hello
+hi, i'm jack .
 nice to meet you .
-nice to meet you !
-how are you ?
 What ' s your name ?
-What is your name ?
+how are you ?
 How old are you ?
+Are you a robot ?
+Are you a human ?
 Where are you from ?
-which university you studying ?
-Where do you come from ?
-What is your surname ?
-What is your family name ?
-What's your first name ?
-What's your address ?
 Where do you live ?
-What's your telephone number ?
-What's your email address ?
+Where do you come from ?
+which university you studying ?
+What ' s your address ?
+What ' s your phone number ?
+What ' s your email ?
 When and where were you born ?
 Are you married ?
-What's your marital status ?
 What do you do ?
-What's your job ?
+What ' s your job ?
 Have you got a house ?
 Have you got any children?
 Can you play tennis ?
 Can you speak English ?
 Could you speak English when you were five years old?
-How do you do?
 Bye .
-Good morning .
-Good morning !

@@ -3,7 +3,8 @@
         "PATH": "./data/",
         "MOVIE_CONVERSATIONS": "movie_conversations.txt",
         "MOVIE_LINES": "movie_lines.txt",
-        "DIALOGUE_CORPUS": "dialogue_corpus.txt"
+        "DIALOGUE_CORPUS": "dialogue_corpus.txt",
+        "IS_AUGMENT": false
     },
     "LOADER": {
         "MIN_LENGTH": 1,
@@ -14,19 +15,25 @@
         "CUDA": true,
         "N_EPOCHS": 100000,
         "BATCH_SIZE": 32,
-        "LEARNING_RATE": 0.0001,
+        "LEARNING_RATE": 0.7,
         "TEACHER_FORCING_RATIO": 0.5,
         "CLIP": 5,
-        "PATH": "./checkpoint/simple_lstm/",
+        "REVERSE_INPUT": true,
+        "PATH": "./checkpoint/512_2_4_re_bi_attn/",
         "VOCABULARY": "vocabulary.txt",
-        "PREFIX": "dump"
+        "PREFIX": "dump",
+        "PRINT_EVERY": 1500,
+        "SAVE_EVERY": 3000
     },
     "MODEL": {
-        "HIDDEN_SIZE": 256,
-        "N_ENCODER_LAYERS": 3,
-        "N_DECODER_LAYERS": 1,
+        "NAME":"base_lstm",
+        "HIDDEN_SIZE": 512,
+        "N_ENCODER_LAYERS": 2,
+        "N_DECODER_LAYERS": 4,
+        "ENCODER_BIDIRECTIONAL": true,
+        "SINGLE_EMBEDDING": true,
         "DROPOUT": 0.1,
-        "ATTN_METHOD": "general",
+        "USE_ATTN": true,
         "TIE_WEIGHTS": false
     },
     "TEST": {

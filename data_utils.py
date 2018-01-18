@@ -24,7 +24,7 @@ def basic_tokenizer(sentence):
 def build_DataLoader(batch_size=32):
     pairs = []
     length_range = range(config.min_length, config.max_length)
-    print('Loding Corpus.')
+    print('Loading Corpus.')
     with open(config.data_path + config.dialogue_corpus) as file:
         i = 0
         for line in file:
