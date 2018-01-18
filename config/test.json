@@ -21,6 +21,7 @@
         "REVERSE_INPUT": true,
         "PATH": "./checkpoint/test/",
         "VOCABULARY": "vocabulary.txt",
+        "VOCABULARY_SIZE": 20000,
         "PREFIX": "dump",
         "PRINT_EVERY": 5,
         "SAVE_EVERY": 1000
@@ -28,8 +29,8 @@
     "MODEL": {
         "NAME":"base_lstm",
         "HIDDEN_SIZE": 16,
-        "N_ENCODER_LAYERS": 4,
-        "N_DECODER_LAYERS": 8,
+        "N_ENCODER_LAYERS": 2,
+        "N_DECODER_LAYERS": 4,
         "ENCODER_BIDIRECTIONAL": true,
         "SINGLE_EMBEDDING": true,
         "DROPOUT": 0.1,

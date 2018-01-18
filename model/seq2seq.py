@@ -46,7 +46,7 @@ class Seq2Seq(nn.Module):
             all_decoder_outputs.data = all_decoder_outputs.data.cuda()
             decoder_input.data = decoder_input.data.cuda()
 
-        decoder_hidden = encoder_hidden[:config.n_decoder_layers]
+        decoder_hidden = tuple([x[:config.n_decoder_layers]for x in encoder_hidden])
         for t in range(max_target_length):
             decoder_output, decoder_hidden = self.decoder(decoder_input,\
                     decoder_hidden, encoder_outputs, is_train = is_train)

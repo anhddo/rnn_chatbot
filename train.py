@@ -25,15 +25,11 @@ def main():
 
 def init_milestone(total_batch):
     milestones = [total_batch * 5] * 5
-    milestones[0] = total_batch * 50
-    milestones[1] = total_batch * 20
-    milestones[2] = total_batch * 10
-    milestones[3] = total_batch * 10
-    milestones[4] = total_batch * 10
+    milestones[0] = total_batch * 10
     return np.cumsum(milestones)
 
 def train():
-    dataset = build_DataLoader(batch_size=config.batch_size)
+    dataset = build_DataLoader()
     vocabulary_list = sorted(dataset.vocabulary.word2index.items(),\
             key=lambda x: x[1])
     save_vocabulary(vocabulary_list)
@@ -99,10 +95,12 @@ def hot_update_lr(model_optimizer):
 
 
 def print_summary(start, epoch, n_iters, print_ppl_avg):
-    output_log = '%s (epoch: %d finish: %d%%) PPL: %.4f' %\
+    output_log = '%s (iter: %d finish: %d%%) PPL: %.4f' %\
         (time_since(start, float(epoch) / n_iters), epoch, float(epoch) /
                 n_iters * 100, print_ppl_avg)
     print(output_log)
+    with open(config.checkpoint_path+'log.txt', "a") as myfile:
+        myfile.write(output_log+'\n')
 
 def as_minutes(s):
     m = math.floor(s / 60)

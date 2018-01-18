@@ -3,7 +3,8 @@
         "PATH": "./data/",
         "MOVIE_CONVERSATIONS": "movie_conversations.txt",
         "MOVIE_LINES": "movie_lines.txt",
-        "DIALOGUE_CORPUS": "dialogue_corpus.txt"
+        "DIALOGUE_CORPUS": "dialogue_corpus.txt",
+        "IS_AUGMENT": true
     },
     "LOADER": {
         "MIN_LENGTH": 1,
@@ -13,13 +14,14 @@
     "TRAIN": {
         "CUDA": true,
         "N_EPOCHS": 100000,
-        "BATCH_SIZE": 16,
+        "BATCH_SIZE": 32,
         "LEARNING_RATE": 2.8,
         "TEACHER_FORCING_RATIO": 0.5,
         "CLIP": 5,
         "REVERSE_INPUT": true,
         "PATH": "./checkpoint/128_2_4_re_bi_attn/",
         "VOCABULARY": "vocabulary.txt",
+        "VOCABULARY_SIZE": 20000,
         "PREFIX": "dump",
         "PRINT_EVERY": 1500,
         "SAVE_EVERY": 3000

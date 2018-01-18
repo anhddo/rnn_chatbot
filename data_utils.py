@@ -7,6 +7,7 @@ import torch
 from torch.autograd import Variable
 from custom_token import *
 import config
+import operator
 
 
 # Regular expressions used to tokenize.
@@ -21,7 +22,7 @@ def basic_tokenizer(sentence):
         words.extend(re.split(_WORD_SPLIT, space_separated_fragment))
     return [w for w in words if w]
 
-def build_DataLoader(batch_size=32):
+def build_DataLoader():
     pairs = []
     length_range = range(config.min_length, config.max_length)
     print('Loading Corpus.')
@@ -34,31 +35,16 @@ def build_DataLoader(batch_size=32):
             pb = pb.split()
             if len(pa) in length_range and len(pb) in length_range:
                 pairs.append((pa, pb))
-                # for text
-                # i += 1
-                # if i >= 3000:
-                #     break
 
     print('Read dialogue pair: %d' % len(pairs))
     vocab = Vocabulary()
     for pa, pb in pairs:
         for word in pa + pb:
             vocab.index_word(word)
-    vocab.trim(config.min_count)
+    vocab.trim()
 
-    keep_pairs = []
-    for pa, pb in pairs:
-        keep = True
-        for word in pa + pb:
-            if word not in vocab.word2count:
-                keep = False
-                break
-        if keep:
-            keep_pairs.append((pa, pb))
-    n_pairs = len(pairs)
-    n_keep_pairs = len(keep_pairs)
-    print('Trimmed from %d pairs to %d, %.4f of total' % (n_pairs, n_keep_pairs, float(n_keep_pairs) / n_pairs))
-    loader = DataLoader(vocab, keep_pairs, batch_size)
+    print('total pairs: %d' % (len(pairs)))
+    loader = DataLoader(vocab, pairs)
     print('Batch number: %d' % len(loader))
     return loader
 
@@ -69,13 +55,10 @@ class Vocabulary(object):
 
     def reset(self):
         self.word2count = {}
-        self.word2index = {"PAD": 0, "GO": 1, "EOS": 2}
-        self.index2word = {0: "PAD", 1: "GO", 2: "EOS"}
-        self.n_words = 3
+        self.word2index = {"PAD": 0, "GO": 1, "EOS": 2, "UNK": 3}
+        self.index2word = {0: "PAD", 1: "GO", 2: "EOS", 3: "UNK"}
+        self.n_words = 4
 
-    # def index_words(self, sentence):
-    #     for word in sentence.split():
-    #         self.index_word(word)
 
     def index_word(self, word):
         if word not in self.word2count:
@@ -86,26 +69,24 @@ class Vocabulary(object):
         else:
             self.word2count[word] += 1
 
-    def trim(self, min_count):
+    def trim(self):
         if self.trimmed:
             return
         self.trimmed = True
 
-        keep_words = []
-        for word, times in self.word2count.items():
-            if times >= min_count:
-                keep_words.append(word)
-        n_keep_words = len(keep_words)
-        n_src_words = len(self.word2index)
-        print('keep words %s / %s = %.4f' % (n_keep_words, n_src_words, float(n_keep_words) / n_src_words))
-
+        # sortword2count
+        self.word2count = sorted(self.word2count.items(), key = operator.itemgetter(1), reverse = True)
+        print('total words %d' % (len(self.word2count)))
+        self.word2count = self.word2count[:config.vocabulary_size]
+        keep_words = [pair[0] for pair in self.word2count]
         self.reset()
         for word in keep_words:
             self.index_word(word)
 
 
 class DataLoader(object):
-    def __init__(self, vocabulary, src_pairs, batch_size):
+    def __init__(self, vocabulary, src_pairs):
+        batch_size = config.batch_size
         self.vocabulary = vocabulary
         self.data = []
         self.test = []
@@ -181,7 +162,9 @@ class DataLoader(object):
         return (input_var, input_lens), (target_var, target_lens)
 
     def indexes_from_sentence(self, sentence):
-        return [self.vocabulary.word2index[word] for word in sentence] + [EOS_token]
+        to_index = lambda word: self.vocabulary.word2index[word] if word in \
+                self.vocabulary.word2index else UNK_token
+        return [to_index(word) for word in sentence] + [EOS_token]
 
     def pad_seq(self, seq, max_length):
         seq += [PAD_token for i in range(max_length - len(seq))]

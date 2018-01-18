@@ -28,6 +28,7 @@ use_attn = 0
 movie_conversations = 0
 movie_lines = 0
 is_augment = 0
+vocabulary_size = 0
 
 def parse(config_str):
     global use_cuda
@@ -58,6 +59,7 @@ def parse(config_str):
     global min_count
     global ckpt_epoch
     global use_attn
+    global vocabulary_size
 
     with open('config/%s.json' %(config_str)) as config_file:
         config = json.load(config_file)
@@ -80,6 +82,7 @@ def parse(config_str):
         clip = config['TRAIN']['CLIP']
         learning_rate = config['TRAIN']['LEARNING_RATE']
         teacher_forcing_ratio = config['TRAIN']['TEACHER_FORCING_RATIO']
+        vocabulary_size = config['TRAIN']['VOCABULARY_SIZE']
 
         print_every = config['TRAIN']['PRINT_EVERY']
         save_every = config['TRAIN']['SAVE_EVERY']

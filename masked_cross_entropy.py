@@ -3,11 +3,9 @@ import json
 import torch
 from torch.nn import functional
 from torch.autograd import Variable
+import config
 
-with open('config.json') as config_file:
-    config = json.load(config_file)
 
-USE_CUDA = config['TRAIN']['CUDA']
 
 def sequence_mask(sequence_length, max_len=None):
     if max_len is None:
@@ -25,7 +23,7 @@ def sequence_mask(sequence_length, max_len=None):
 
 def masked_cross_entropy(logits, target, length):
     length = Variable(torch.LongTensor(length))
-    if USE_CUDA:
+    if config.use_cuda:
         length = length.cuda()
     """
     Args:

@@ -38,8 +38,7 @@ def model_evaluate(model, dataset, evaluate_num=10, auto_test=True):
     if auto_test is True:
         bot = BotAgent(model, dataset.vocabulary)
         for question in question_list:
-            print('> %s' % question)
-            print('bot: %s' % bot.response(question))
+            print(' %s=>: %s' % (question, bot.response(question)))
     model.train(True)
     return total_loss / evaluate_num
 
