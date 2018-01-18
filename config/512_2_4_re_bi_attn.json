@@ -21,6 +21,7 @@
         "REVERSE_INPUT": true,
         "PATH": "./checkpoint/512_2_4_re_bi_attn/",
         "VOCABULARY": "vocabulary.txt",
+        "VOCABULARY_SIZE": 20000,
         "PREFIX": "dump",
         "PRINT_EVERY": 1500,
         "SAVE_EVERY": 3000
