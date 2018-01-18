@@ -25,7 +25,7 @@ def main():
 
 def init_milestone(total_batch):
     milestones = [total_batch * 5] * 5
-    milestones[0] = total_batch * 10
+    milestones[0] = total_batch * 30
     return np.cumsum(milestones)
 
 def train():
@@ -76,9 +76,9 @@ def train():
         if iter_idx % config.print_every == 0:
             test_loss = model_evaluate(model, dataset)
             print_summary(start, iter_idx, n_iters,\
-                    math.exp(print_loss_total / config.print_every))
-            print('Test PPL: %.4f, lr=%f' % (math.exp(test_loss),
-                optimizer.param_groups[0]['lr']))
+                    math.exp(print_loss_total / config.print_every),\
+                    optimizer.param_groups[0]['lr']) 
+            print('Test loss: %.4f ' % (math.exp(test_loss)))
             print_loss_total = 0.0
             # hot_update_lr(optimizer)
         if iter_idx % config.save_every == 0:
@@ -94,10 +94,10 @@ def hot_update_lr(model_optimizer):
         param_group['lr'] = learning_rate
 
 
-def print_summary(start, epoch, n_iters, print_ppl_avg):
-    output_log = '%s (iter: %d finish: %d%%) PPL: %.4f' %\
+def print_summary(start, epoch, n_iters, print_ppl_avg, lr):
+    output_log = '%s (iter: %d finish: %d%%) loss: %.4f, lr=%f' %\
         (time_since(start, float(epoch) / n_iters), epoch, float(epoch) /
-                n_iters * 100, print_ppl_avg)
+                n_iters * 100, print_ppl_avg, lr)
     print(output_log)
     with open(config.checkpoint_path+'log.txt', "a") as myfile:
         myfile.write(output_log+'\n')
