@@ -14,7 +14,7 @@
     "TRAIN": {
         "CUDA": true,
         "N_EPOCHS": 100000,
-        "BATCH_SIZE": 16,
+        "BATCH_SIZE": 32,
         "LEARNING_RATE": 0.7,
         "TEACHER_FORCING_RATIO": 0.5,
         "CLIP": 5,
