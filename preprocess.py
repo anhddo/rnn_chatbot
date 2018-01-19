@@ -44,36 +44,34 @@ def augment_extract(dialogues, id2sentence):
     for ids in dialogues:
         join_func = lambda id: ' '.join(data_utils.basic_tokenizer(id2sentence[id]))
         sentences = [join_func(id) for id in ids]
-        # questions.extend(sentences[:-1])
-        # answers.extend(sentences[1:])
         augment_sentence(sentences[:-1], sentences[1:], augment_q, augment_a)
-        # assert len(questions) == len(answers)
         assert len(augment_q) == len(augment_a)
-
-    # questions.extend(augment_q)
-    # answers.extend(augment_a)
-
-    # return questions, answers
     return augment_q, augment_a
 
 def normal_extract(dialogues, id2sentence):
     questions, answers = [], []
     for ids in dialogues:
-        length = len(ids) if len(ids) % 2 == 0 else len(ids) - 1
-        for i in range(length):
-            sentence = ' '.join(data_utils.basic_tokenizer(id2sentence[ids[i]]))
-            if i % 2 == 0:
-                questions.append(sentence)
-            else:
-                answers.append(sentence)
+        join_func = lambda id: ' '.join(data_utils.basic_tokenizer(id2sentence[id]))
+        sentences = [join_func(id) for id in ids]
+        questions.extend(sentences[:-1])
+        answers.extend(sentences[1:])
+        # length = len(ids) if len(ids) % 2 == 0 else len(ids) - 1
+        # for i in range(length):
+        #     sentence = ' '.join(data_utils.basic_tokenizer(id2sentence[ids[i]]))
+        #     if i % 2 == 0:
+        #         questions.append(sentence)
+        #     else:
+        #         answers.append(sentence)
     return questions, answers
 
 def export_dialogue_corpus():
     dialogues = load_conversations(config.data_path + config.movie_conversations)
     id2sentence = load_movie_lines(config.data_path + config.movie_lines)
     if config.is_augment:
+        print('augment data')
         questions, answers = augment_extract(dialogues, id2sentence)
     else:
+        print('no augment')
         questions, answers = normal_extract(dialogues, id2sentence)
     dialogue_groups = zip(questions, answers)
 
@@ -86,7 +84,8 @@ def export_dialogue_corpus():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('-c', dest='config')
+    parser.add_argument('-a', dest='augment', type=int)
     args = parser.parse_args()
-    config.parse(args.config)
+    config.is_augment = args.augment
+    config.parse('default')
     export_dialogue_corpus()

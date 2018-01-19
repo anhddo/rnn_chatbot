@@ -12,11 +12,37 @@ import numpy as np
 import glob
 from importlib import import_module
 import config
+from model.seq2seq import Seq2Seq, Encoder, Decoder
+import torch.nn as nn
 
 question_list = []
 with open('test_questions.txt') as file:
     for line in file:
         question_list.append(line[:-1])
+
+
+def create_model(vocab_size):
+    embedding = nn.Embedding(vocab_size, config.hidden_size) \
+            if config.single_embedding else None
+
+    encoder = Encoder(vocab_size, config.hidden_size, \
+            n_layers = config.n_encoder_layers, dropout=config.dropout)
+
+
+    decoder = Decoder(config.hidden_size, vocab_size,\
+            n_layers = config.n_decoder_layers, dropout=config.dropout)
+
+    model = Seq2Seq(
+        encoder=encoder,
+        decoder=decoder,
+        max_length = config.max_length
+    )
+
+    if config.use_cuda:
+        model.cuda()
+
+    return model
+
 
 def model_evaluate(model, dataset, evaluate_num=10, auto_test=True):
     model.train(False)
@@ -61,8 +87,7 @@ def max_ckpts():
     retun -1 if len(ckpts) == 0 else max(ckpts)
 
 def build_model(vocab_size, load_ckpt=False, ckpt_epoch = -1):
-    model_pkg = import_module('model.%s'%(config.model_name))
-    model = model_pkg.create_model(vocab_size)
+    model = create_model(vocab_size)
 
     if load_ckpt is True and os.path.exists(config.checkpoint_path) is True:
         # load checkpoint

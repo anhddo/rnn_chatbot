@@ -53,7 +53,6 @@ def parse(config_str):
     global dialogue_corpus
     global movie_conversations
     global movie_lines
-    global is_augment
     global min_length
     global max_length
     global min_count
@@ -96,7 +95,6 @@ def parse(config_str):
         dialogue_corpus = config['DATA']['DIALOGUE_CORPUS']
         movie_conversations = config['DATA']['MOVIE_CONVERSATIONS']
         movie_lines = config['DATA']['MOVIE_LINES']
-        is_augment = config['DATA']['IS_AUGMENT']
         # range of sentenct length
         min_length = config['LOADER']['MIN_LENGTH']
         max_length = config['LOADER']['MAX_LENGTH']

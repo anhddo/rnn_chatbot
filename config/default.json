@@ -3,8 +3,7 @@
         "PATH": "./data/",
         "MOVIE_CONVERSATIONS": "movie_conversations.txt",
         "MOVIE_LINES": "movie_lines.txt",
-        "DIALOGUE_CORPUS": "dialogue_corpus.txt",
-        "IS_AUGMENT": true
+        "DIALOGUE_CORPUS": "dialogue_corpus.txt"
     },
     "LOADER": {
         "MIN_LENGTH": 1,

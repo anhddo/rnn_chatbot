@@ -13,13 +13,14 @@
     "TRAIN": {
         "CUDA": true,
         "N_EPOCHS": 100000,
-        "BATCH_SIZE": 16,
-        "LEARNING_RATE": 2.8,
+        "BATCH_SIZE": 32,
+        "LEARNING_RATE": 0.7,
         "TEACHER_FORCING_RATIO": 0.5,
         "CLIP": 5,
         "REVERSE_INPUT": true,
         "PATH": "./checkpoint/256_4_4/",
         "VOCABULARY": "vocabulary.txt",
+        "VOCABULARY_SIZE": 20000,
         "PREFIX": "dump",
         "PRINT_EVERY": 1500,
         "SAVE_EVERY": 3000
