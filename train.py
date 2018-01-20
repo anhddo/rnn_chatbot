@@ -39,6 +39,7 @@ def train():
     print(model)
     optimizer = optim.SGD(model.parameters(), lr = config.learning_rate)
 
+    criterion = nn.CrossEntropyLoss()
     start = time.time()
     total_batch = len(dataset)
     ckpts = get_ckpts()
@@ -59,15 +60,15 @@ def train():
         # zero gradients
         optimizer.zero_grad()
         # run seq2seq
-        all_decoder_outputs = model(input_group, target_group,\
+        all_decoder_outputs, loss = model(criterion, input_group, target_group, 
                 teacher_forcing_ratio=1)
         target_var, target_lens = target_group
         # loss calculation and backpropagation
-        loss = masked_cross_entropy(
-            all_decoder_outputs.transpose(0, 1).contiguous(),
-            target_var.transpose(0, 1).contiguous(),
-            target_lens
-        )
+        # loss = masked_cross_entropy(
+        #     all_decoder_outputs.transpose(0, 1).contiguous(),
+        #     target_var.transpose(0, 1).contiguous(),
+        #     target_lens
+        # )
         print_loss_total += loss.data[0]
         loss.backward()
         clip_grad_norm(model.parameters(), config.clip)
@@ -75,7 +76,7 @@ def train():
         optimizer.step()
 
         if iter_idx % config.print_every == 0:
-            test_loss = model_evaluate(model, dataset)
+            test_loss = model_evaluate(model, criterion, dataset)
             print_summary(start, iter_idx, n_iters,\
                     math.exp(print_loss_total / config.print_every),\
                     optimizer.param_groups[0]['lr']) 

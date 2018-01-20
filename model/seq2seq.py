@@ -10,6 +10,7 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from custom_token import *
 import config
 from model.attention import Attention
+import numpy as np
 
 
 class Seq2Seq(nn.Module):
@@ -22,7 +23,7 @@ class Seq2Seq(nn.Module):
         for param in self.parameters():
             param.data.uniform_(-0.08, 0.08)
 
-    def forward(self, input_group, target_group=(None, None),
+    def forward(self, criterion, input_group, target_group=(None, None),
             teacher_forcing_ratio=0.5, is_train = True):
         input_var, input_lens = input_group
         encoder_outputs, encoder_hidden = self.encoder(input_var, input_lens)
@@ -47,6 +48,7 @@ class Seq2Seq(nn.Module):
             decoder_input.data = decoder_input.data.cuda()
 
         decoder_hidden = tuple([x[:config.n_decoder_layers]for x in encoder_hidden])
+
         for t in range(max_target_length):
             decoder_output, decoder_hidden = self.decoder(decoder_input,\
                     decoder_hidden, encoder_outputs, is_train = is_train)
@@ -59,7 +61,31 @@ class Seq2Seq(nn.Module):
                 topv, topi = decoder_output.topk(1, dim=1)
                 decoder_input = topi.squeeze(1)
 
-        return all_decoder_outputs
+
+        loss = 0
+        if is_train:
+            loss = self.calc_loss(criterion, target_group, all_decoder_outputs)
+        return all_decoder_outputs, loss
+
+    def calc_loss(self, criterion, target_group, all_decoder_outputs):
+        target_var, target_lens = target_group
+        #sort reverse order
+        sort_index = np.argsort(target_lens)[::-1].tolist()
+        #apply sort index to array
+        sorted_target_lens = [target_lens[i] for i in sort_index]
+        sort_index = torch.LongTensor(sort_index)
+        if config.use_cuda:
+            sort_index = sort_index.cuda()
+        sorted_decoder_output = torch.index_select(all_decoder_outputs,
+                1,Variable(sort_index))
+        sorted_target_var = torch.index_select(target_var,  1, Variable(sort_index))
+        #pack input and target to apply crossentropyloss
+        input_loss = pack_padded_sequence(sorted_decoder_output,
+                sorted_target_lens)
+        target_loss = pack_padded_sequence(sorted_target_var,
+                sorted_target_lens)
+        loss = criterion(input_loss.data, target_loss.data)
+        return loss
 
 
     def response(self, input_var):
@@ -67,7 +93,8 @@ class Seq2Seq(nn.Module):
         length = input_var.size(0)
         input_group = (input_var, [length])
         # outputs size (max_length, output_size)
-        decoder_outputs = self.forward(input_group, teacher_forcing_ratio=0,
+        decoder_outputs = self.forward(criterion = None,input_group =
+                input_group, teacher_forcing_ratio=0,
                 is_train = False)
         return decoder_outputs
 

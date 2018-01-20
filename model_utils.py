@@ -44,20 +44,13 @@ def create_model(vocab_size):
     return model
 
 
-def model_evaluate(model, dataset, evaluate_num=10, auto_test=True):
+def model_evaluate(model, criterion, dataset, evaluate_num=10, auto_test=True):
     model.train(False)
     total_loss = 0.0
     for _ in range(evaluate_num):
         input_group, target_group = dataset.random_test()
-        all_decoder_outputs = model(input_group,
-                target_group,
+        all_decoder_outputs, loss = model(criterion, input_group, target_group, 
                 teacher_forcing_ratio=1)
-        target_var, target_lens = target_group
-        loss = masked_cross_entropy(
-            all_decoder_outputs.transpose(0, 1).contiguous(),
-            target_var.transpose(0, 1).contiguous(),
-            target_lens
-        )
         total_loss += loss.data[0]
         # format_output(dataset.vocabulary.index2word, input_group,\
         #target_group, all_decoder_outputs)
@@ -156,7 +149,7 @@ class BotAgent(object):
         input_var = self.build_input_var(question)
         if input_var is None:
             return "sorry, I don 't know ."
-        decoder_output = self.model.response(input_var)
+        decoder_output,_ = self.model.response(input_var)
         decoder_output = decoder_output.squeeze(1)
         topv, topi = decoder_output.data.topk(1, dim=1)
         topi = topi.squeeze(1)
