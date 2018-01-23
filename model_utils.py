@@ -4,9 +4,9 @@ import sys
 import json
 import random
 import torch
+from torch.autograd import Variable
 import data_utils
 from data_utils import Vocabulary
-from masked_cross_entropy import *
 from custom_token import *
 import numpy as np
 import glob
@@ -38,7 +38,7 @@ def create_model(vocab_size):
         max_length = config.max_length
     )
 
-    if config.use_cuda:
+    if torch.cuda.is_available() and config.use_cuda:
         model.cuda()
 
     return model
@@ -94,13 +94,14 @@ def build_model(vocab_size, load_ckpt=False, ckpt_epoch = -1):
             if len(ckpts) > 0:
                 model_path = '%s%s_%d' % (config.checkpoint_path, prefix, max(ckpts))
 
-        print(model_path)
         if model_path is not None and os.path.exists(model_path):
             torch_object = torch.load(model_path)
             model.load_state_dict(torch_object)
             print('Load %s' % model_path)
+        else:
+            print('%s not found'%model_path)
 
-    if config.use_cuda:
+    if config.use_cuda and torch.cuda.is_available():
         model = model.cuda()
     return model
 

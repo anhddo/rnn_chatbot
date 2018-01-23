@@ -16,6 +16,7 @@ def main():
     parser.add_argument('-e', dest='epoch', type = int)
     args = parser.parse_args()
     config.parse(args.config)
+    config.cuda = False
     vocab = load_vocabulary()
     model = build_model(len(vocab.word2index), load_ckpt=True,
             ckpt_epoch=args.epoch)

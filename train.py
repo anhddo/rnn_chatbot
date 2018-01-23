@@ -8,7 +8,6 @@ import torch.nn as nn
 from torch import optim
 from torch.nn.utils import clip_grad_norm
 from data_utils import build_DataLoader
-from masked_cross_entropy import *
 from model_utils import build_model, save_model, model_evaluate,\
         save_vocabulary, get_ckpts
 import argparse
@@ -60,15 +59,9 @@ def train():
         # zero gradients
         optimizer.zero_grad()
         # run seq2seq
-        all_decoder_outputs, loss = model(criterion, input_group, target_group, 
+        _, loss = model(criterion, input_group, target_group, 
                 teacher_forcing_ratio=1)
         target_var, target_lens = target_group
-        # loss calculation and backpropagation
-        # loss = masked_cross_entropy(
-        #     all_decoder_outputs.transpose(0, 1).contiguous(),
-        #     target_var.transpose(0, 1).contiguous(),
-        #     target_lens
-        # )
         print_loss_total += loss.data[0]
         loss.backward()
         clip_grad_norm(model.parameters(), config.clip)
@@ -87,14 +80,6 @@ def train():
             save_model(model, iter_idx)
         # break
     save_model(model, iter_idx)
-
-def hot_update_lr(model_optimizer):
-    with open('config.json') as config_file:
-        config = json.load(config_file)
-    learning_rate = config['TRAIN']['LEARNING_RATE']
-    for param_group in model_optimizer.param_groups:
-        param_group['lr'] = learning_rate
-
 
 def print_summary(start, epoch, n_iters, print_ppl_avg, lr):
     output_log = '%s (iter: %d finish: %d%%) loss: %.4f, lr=%f' %\

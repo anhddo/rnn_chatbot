@@ -55,13 +55,6 @@ def normal_extract(dialogues, id2sentence):
         sentences = [join_func(id) for id in ids]
         questions.extend(sentences[:-1])
         answers.extend(sentences[1:])
-        # length = len(ids) if len(ids) % 2 == 0 else len(ids) - 1
-        # for i in range(length):
-        #     sentence = ' '.join(data_utils.basic_tokenizer(id2sentence[ids[i]]))
-        #     if i % 2 == 0:
-        #         questions.append(sentence)
-        #     else:
-        #         answers.append(sentence)
     return questions, answers
 
 def export_dialogue_corpus():
