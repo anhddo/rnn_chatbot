@@ -53,3 +53,5 @@ bot: california . oakland .
 
 ```
 The chatbot can answer these simple questions, but in most cases it is a silly bot.
+
+pre-train model: https://drive.google.com/drive/folders/1vS_IKIidFoxTa8D6wKNfwuwCkvni13_a?usp=sharing
