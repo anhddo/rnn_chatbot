@@ -19,7 +19,7 @@ This script will create file `dialogue_corpus.txt` in `./data` directory.
 python train.py -c config
 ```
 The hyperparameters of model define in configuration file in config folder.
-Ex: python train.py -c 256_4_4
+Ex: python train.py -c 256_4_4.  
 In my local environment(GTX1080), training model need about 12 hours.
 
 ### Testing
