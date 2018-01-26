@@ -61,7 +61,6 @@ def train():
         # run seq2seq
         _, loss = model(criterion, input_group, target_group, 
                 teacher_forcing_ratio=1)
-        target_var, target_lens = target_group
         print_loss_total += loss.data[0]
         loss.backward()
         clip_grad_norm(model.parameters(), config.clip)

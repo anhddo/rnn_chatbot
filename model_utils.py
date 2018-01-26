@@ -106,7 +106,10 @@ def build_model(vocab_size, load_ckpt=False, ckpt_epoch = -1):
     return model
 
 def init_path():
-    if os.path.exists(config.checkpoint_path) is False:
+    if not os.path.exists('checkpoint/'):
+        os.mkdir('checkpoint/')
+
+    if not os.path.exists(config.checkpoint_path):
         os.mkdir(config.checkpoint_path)
 
 def save_model(model, iter_idx):
