@@ -1,0 +1,11 @@
+(hiddensize: 256, encoder layer: 4, decoder_layer:4)
+command:
+            python3 chatbot.py -c 512_2_4_bi -e 527310
+-------------------------------------------------------------------------
+(encoder layer: 2, decoder_layer:4, bidirectional)
+command:
+            python3 chatbot.py -c 512_2_4_bi -e 527310
+-------------------------------------------------------------------------
+(encoder layer: 2, decoder_layer:4, bidirectional, attention)
+command:
+            python3 chatbot.py -c 512_2_4_bi_attn -e 527310
