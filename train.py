@@ -81,7 +81,7 @@ def train():
             print('Test loss: %.4f ' % (test_loss))
             print_loss_total = 0.0
             train_stat.add(iter_idx, train_loss, test_loss)
-            train_stat.plot()
+            # train_stat.plot()
             # hot_update_lr(optimizer)
         if iter_idx % config.save_every == 0:
             save_model(model, iter_idx)
