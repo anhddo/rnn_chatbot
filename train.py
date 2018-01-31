@@ -24,9 +24,9 @@ def main():
     train()
 
 def init_milestone(total_batch):
-    milestones = [total_batch * 5] * 10
-    milestones[0] = total_batch * 50
-    milestones[1] = total_batch * 15
+    milestones = [total_batch] * 10
+    milestones[0] = total_batch * 10
+    milestones[1] = total_batch * 5
     return np.cumsum(milestones)
 
 def train():
