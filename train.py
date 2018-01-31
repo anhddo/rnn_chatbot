@@ -32,6 +32,7 @@ def init_milestone(total_batch):
 def train():
     train_stat = TrainStat()
     train_stat.load()
+    print(train_stat.iters)
 
     dataset = build_DataLoader()
     vocabulary_list = sorted(dataset.vocabulary.word2index.items(),\
@@ -56,17 +57,10 @@ def train():
             milestones = milestones, gamma=0.5)
     scheduler.step(iter_idx)
     print('Start Training. total: %s iterations'%n_iters)
-    ttime = 0
     while iter_idx < n_iters:
         iter_idx += 1
         scheduler.step()
         input_group, target_group = dataset.random_batch()
-
-        stime = time.time()
-        if config.use_cuda:
-            input_group = (input_group[0].cuda(), input_group[1])
-            target_group = (target_group[0].cuda(), target_group[1])
-        ttime += time.time() - stime
         # zero gradients
         optimizer.zero_grad()
         # run seq2seq
@@ -87,6 +81,7 @@ def train():
             print('Test loss: %.4f ' % (test_loss))
             print_loss_total = 0.0
             train_stat.add(iter_idx, train_loss, test_loss)
+            train_stat.plot()
             # hot_update_lr(optimizer)
         if iter_idx % config.save_every == 0:
             save_model(model, iter_idx)

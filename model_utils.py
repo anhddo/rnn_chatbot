@@ -49,11 +49,6 @@ def model_evaluate(model, criterion, dataset, evaluate_num=10, auto_test=True):
     total_loss = 0.0
     for _ in range(evaluate_num):
         input_group, target_group = dataset.random_test()
-
-        if config.use_cuda:
-            input_group = (input_group[0].cuda(), input_group[1])
-            target_group = (target_group[0].cuda(), target_group[1])
-
         all_decoder_outputs, loss = model(criterion, input_group, target_group, 
                 teacher_forcing_ratio=1)
         total_loss += loss.data[0]
