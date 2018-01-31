@@ -29,6 +29,7 @@ movie_conversations = 0
 movie_lines = 0
 is_augment = 0
 vocabulary_size = 0
+train_stat_path = 0
 
 def parse(config_str):
     global use_cuda
@@ -59,12 +60,14 @@ def parse(config_str):
     global ckpt_epoch
     global use_attn
     global vocabulary_size
+    global train_stat_path 
 
     with open('config/%s.json' %(config_str)) as config_file:
         config = json.load(config_file)
         use_cuda = config['TRAIN']['CUDA']
         model_name = config['MODEL']['NAME']
         checkpoint_path = config['TRAIN']['PATH']
+        train_stat_path = checkpoint_path + 'train_stat.pickle'
         vocabulary_path = '%s%s' % (checkpoint_path,\
                 config['TRAIN']['VOCABULARY'])
         batch_size = config['TRAIN']['BATCH_SIZE']

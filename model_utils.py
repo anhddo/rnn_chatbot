@@ -121,7 +121,10 @@ def save_model(model, iter_idx):
         for idx in sorted_idx[:-2]:
             os.remove(file_names[idx])
     save_path = '%s%s_%d' % (config.checkpoint_path, config.prefix, iter_idx)
+    model.cpu()
     torch.save(model.state_dict(), save_path)
+    if config.use_cuda:
+        model.cuda()
 
 def save_vocabulary(vocabulary_list):
     init_path()

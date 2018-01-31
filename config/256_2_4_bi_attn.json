@@ -3,8 +3,7 @@
         "PATH": "./data/",
         "MOVIE_CONVERSATIONS": "movie_conversations.txt",
         "MOVIE_LINES": "movie_lines.txt",
-        "DIALOGUE_CORPUS": "dialogue_corpus.txt",
-        "IS_AUGMENT": true
+        "DIALOGUE_CORPUS": "dialogue_corpus.txt"
     },
     "LOADER": {
         "MIN_LENGTH": 1,
@@ -14,21 +13,21 @@
     "TRAIN": {
         "CUDA": true,
         "N_EPOCHS": 100000,
-        "BATCH_SIZE": 16,
+        "BATCH_SIZE": 32,
         "LEARNING_RATE": 0.7,
         "TEACHER_FORCING_RATIO": 0.5,
         "CLIP": 5,
         "REVERSE_INPUT": true,
-        "PATH": "./checkpoint/test/",
+        "PATH": "./checkpoint/256_2_4_bi_attn/",
         "VOCABULARY": "vocabulary.txt",
-        "VOCABULARY_SIZE": 20000,
+        "VOCABULARY_SIZE": 35000,
         "PREFIX": "dump",
-        "PRINT_EVERY": 5,
-        "SAVE_EVERY": 50
+        "PRINT_EVERY": 1500,
+        "SAVE_EVERY": 3000
     },
     "MODEL": {
         "NAME":"base_lstm",
-        "HIDDEN_SIZE": 16,
+        "HIDDEN_SIZE": 256,
         "N_ENCODER_LAYERS": 2,
         "N_DECODER_LAYERS": 4,
         "ENCODER_BIDIRECTIONAL": true,
@@ -39,6 +38,6 @@
     },
     "TEST": {
         "BOT_NAME": "bot",
-        "CKPT_EPOCH": 140
+        "CKPT_EPOCH": 80000
     }
 }
