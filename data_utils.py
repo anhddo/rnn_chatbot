@@ -156,9 +156,9 @@ class DataLoader(object):
         # Turn padded arrays into (batch_size x max_len) tensors, transpose into (max_len x batch_size)
         input_var = Variable(torch.LongTensor(input_padded)).transpose(0, 1)
         target_var = Variable(torch.LongTensor(target_padded)).transpose(0, 1)
-        if config.use_cuda:
-            input_var = input_var.cuda()
-            target_var = target_var.cuda()
+        # if config.use_cuda:
+        #     input_var = input_var.cuda()
+        #     target_var = target_var.cuda()
         return (input_var, input_lens), (target_var, target_lens)
 
     def indexes_from_sentence(self, sentence):
