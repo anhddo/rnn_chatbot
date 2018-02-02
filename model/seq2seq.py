@@ -115,7 +115,7 @@ class Encoder(nn.Module):
 
         self.rnn = nn.LSTM(hidden_size, hidden_size, num_layers=n_layers,\
                 dropout=dropout, bidirectional = config.encoder_bidirectional)
-        self.dropout_layer = nn.Dropout()
+        self.dropout_layer = nn.Dropout(p = 0.2)
 
     def forward(self, inputs_seqs, input_lens, hidden=None):
         # embedded size (max_len, batch_size, hidden_size)
@@ -146,7 +146,7 @@ class Decoder(nn.Module):
 
         self.rnn = nn.LSTM(hidden_size, hidden_size, num_layers=n_layers,
                 dropout=dropout)
-        self.dropout_layer = nn.Dropout()
+        self.dropout_layer = nn.Dropout(p = 0.2)
         self.out = nn.Linear(hidden_size, output_size)
 
     def forward(self, input_seqs, last_hidden, encoder_outputs, is_train = True):
