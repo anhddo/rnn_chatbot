@@ -31,7 +31,6 @@ def init_milestone(total_batch):
 def train():
     train_stat = TrainStat()
     train_stat.load()
-    print(train_stat.iters)
 
     dataset = build_DataLoader()
     vocabulary_list = sorted(dataset.vocabulary.word2index.items(),\
@@ -40,7 +39,8 @@ def train():
     vocab_size = dataset.get_vocabulary_size()
     model = build_model(vocab_size, load_ckpt = True)
     print(model)
-    optimizer = optim.SGD(model.parameters(), lr = config.learning_rate)
+    optimizer = optim.SGD(model.parameters(), lr = config.learning_rate,
+            weight_decay=1e-4)
 
     criterion = nn.CrossEntropyLoss()
     start = time.time()

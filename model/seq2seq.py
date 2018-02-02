@@ -115,10 +115,12 @@ class Encoder(nn.Module):
 
         self.rnn = nn.LSTM(hidden_size, hidden_size, num_layers=n_layers,\
                 dropout=dropout, bidirectional = config.encoder_bidirectional)
+        self.dropout_layer = nn.Dropout()
 
     def forward(self, inputs_seqs, input_lens, hidden=None):
         # embedded size (max_len, batch_size, hidden_size)
         embedded = self.embedding(inputs_seqs)
+        embedded = self.dropout_layer(embedded)
         packed = pack_padded_sequence(embedded, input_lens)
         outputs, hidden = self.rnn(packed, hidden)
         outputs, output_lengths = pad_packed_sequence(outputs)
@@ -144,6 +146,7 @@ class Decoder(nn.Module):
 
         self.rnn = nn.LSTM(hidden_size, hidden_size, num_layers=n_layers,
                 dropout=dropout)
+        self.dropout_layer = nn.Dropout()
         self.out = nn.Linear(hidden_size, output_size)
 
     def forward(self, input_seqs, last_hidden, encoder_outputs, is_train = True):
@@ -153,6 +156,7 @@ class Decoder(nn.Module):
         batch_size = input_seqs.size(0)
         # embedded size (1, batch_size, hidden_size)
         embedded = self.embedding(input_seqs).unsqueeze(0)
+        embedded = self.dropout_layer(embedded)
         # rnn_output,last_ht size (1, batch_size, hidden_size)
         output, hidden = self.rnn(embedded, last_hidden)
         if config.use_attn:
