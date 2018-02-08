@@ -40,7 +40,7 @@ def train():
     model = build_model(vocab_size, load_ckpt = True)
     print(model)
     optimizer = optim.SGD(model.parameters(), lr = config.learning_rate,
-            weight_decay=1e-4)
+            weight_decay=1e-5)
 
     criterion = nn.CrossEntropyLoss()
     start = time.time()
