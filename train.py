@@ -88,13 +88,16 @@ def train():
             save_model(model, iter_idx)
             train_stat.save()
 
-        if iter_idx %(len(dataset) * 2) == 0 :
+        # if iter_idx %(len(dataset) * 2) == 0 :
+        if iter_idx %(2) == 0 :
             test_loss = model_evaluate(model, criterion, dataset, evaluate_num
                     = 100)
             test_loss = math.exp(test_loss)
             if train_stat.last_check_loss < test_loss:
                 break
             train_stat.last_check_loss = test_loss
+            train_stat.save()
+            save_model(model, iter_idx)
     save_model(model, iter_idx)
 
 def print_summary(start, epoch, n_iters, print_ppl_avg, lr):
