@@ -72,19 +72,29 @@ def train():
         optimizer.step()
 
         if iter_idx % config.print_every == 0:
-            test_loss = model_evaluate(model, criterion, dataset)
+            test_loss = model_evaluate(model, criterion, dataset,\
+                    evaluate_num = 10)
             test_loss = math.exp(test_loss)
             train_loss = math.exp(print_loss_total / config.print_every)
             print_summary(start, iter_idx, n_iters, train_loss,\
                     optimizer.param_groups[0]['lr']) 
             print('Test loss: %.4f ' % (test_loss))
             print_loss_total = 0.0
+
             train_stat.add(iter_idx, train_loss, test_loss)
             # train_stat.plot()
             # hot_update_lr(optimizer)
         if iter_idx % config.save_every == 0:
             save_model(model, iter_idx)
             train_stat.save()
+
+        if iter_idx %(len(dataset) * 2) == 0 :
+            test_loss = model_evaluate(model, criterion, dataset, evaluate_num
+                    = 100)
+            test_loss = math.exp(test_loss)
+            if train_stat.last_check_loss < test_loss:
+                break
+            train_stat.last_check_loss = test_loss
     save_model(model, iter_idx)
 
 def print_summary(start, epoch, n_iters, print_ppl_avg, lr):

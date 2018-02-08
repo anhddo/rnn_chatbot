@@ -2,12 +2,14 @@ import config
 import pickle
 import os
 import matplotlib.pyplot as plt
+import math
 
 class TrainStat:
     def __init__(self):
         self.iters = []
         self.train_loss = []
         self.test_loss = []
+        self.last_check_loss = math.inf
 
     def add(self, iter_idx, train_loss, test_loss):
         self.iters.append(iter_idx)
