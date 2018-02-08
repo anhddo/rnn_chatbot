@@ -88,8 +88,7 @@ def train():
             save_model(model, iter_idx)
             train_stat.save()
 
-        # if iter_idx %(len(dataset) * 2) == 0 :
-        if iter_idx %(2) == 0 :
+        if iter_idx %(len(dataset) * 2) == 0 :
             test_loss = model_evaluate(model, criterion, dataset, evaluate_num
                     = 100)
             test_loss = math.exp(test_loss)
